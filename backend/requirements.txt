@@ -1,0 +1,33 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+pydantic==2.9.2
+python-multipart==0.0.9
+
+# TTS deps (from /home/batman/.SOMYA/TTS_things/GNR/requirement.txt); pinned selectively
+torch==2.7.1
+torchaudio==2.7.1
+unsloth==2025.7.7
+transformers==4.53.3
+sentencepiece==0.2.0
+peft==0.16.0
+bitsandbytes==0.46.1
+snac==1.2.1
+soundfile==0.13.1
+librosa==0.11.0
+numpy==2.2.6
+soxr==0.5.0.post1
+accelerate==1.9.0
+einops==0.8.1
+
+# ASR deps (from /home/batman/website/tts_api/asr/requriment.txt)
+faster-whisper==1.2.0
+ctranslate2==4.6.0
+numba==0.62.1
+llvmlite==0.45.1
+scipy==1.16.2
+sounddevice==0.4.6
+jinja2==3.1.6
+pyyaml==6.0.3
+requests==2.32.5
+typing-extensions==4.15.0
+

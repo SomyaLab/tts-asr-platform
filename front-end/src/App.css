@@ -1,0 +1,21 @@
+/* Layout shell */
+#root {
+  max-width: 100%;
+  margin: 0;
+  padding: 0 0px 10px;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 96px 0 64px;
+}
+.hero h1 {
+  font-size: 40px;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.hero p {
+  color: #9ca3af;
+  margin: 0;
+}

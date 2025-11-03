@@ -1,0 +1,68 @@
+.blog {
+  background: #ffffff;
+  color: #0b0f14;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding: 72px 0;
+}
+.blog-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+.two-col { display: grid; grid-template-columns: 220px 1fr; gap: 28px; }
+.blog-header h2 {
+  font-size: clamp(28px, 4.2vw, 40px);
+  margin: 0 0 8px;
+}
+.blog-header p {
+  margin: 0 0 28px;
+  color: #334155;
+}
+.blog-aside { position: sticky; top: 84px; align-self: start; }
+.side-buttons { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.side-btn { padding: 8px 12px; border-radius: 9999px; border: 1px solid #e5e7eb; background: #f8fafc; color: #0b0f14; cursor: pointer; }
+.side-btn.active { background: #0b0f14; color: #ffffff; border-color: #0b0f14; }
+.side-list { display: grid; gap: 6px; }
+.side-item { display: block; padding: 8px 10px; border-radius: 8px; color: #0b0f14; text-decoration: none; border: 1px solid transparent; }
+.side-item:hover { background: #f3f4f6; }
+.side-item.current { border-color: #e5e7eb; background: #f9fafb; }
+
+.blog-article { min-height: 60vh; }
+.blog-hero { text-align: center; padding: 40px 0 24px; }
+.meta-line { color: #94a3b8; font-size: 14px; margin-bottom: 6px; }
+.blog-title-hero { font-size: clamp(36px, 5vw, 56px); margin: 0 0 10px; }
+.blog-sub-hero { color: #64748b; margin: 0 0 16px; }
+.hero-ctas { display: flex; gap: 12px; justify-content: center; }
+.blog-detail {
+  margin-top: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+}
+.detail-paragraph {
+  margin: 0 0 12px;
+  color: #0b0f14;
+}
+.blog-cta {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  background: transparent;
+  color: #111827;
+  text-decoration: none;
+}
+.blog-cta:hover {
+  border-color: #60a5fa;
+  color: #0b1220;
+}
+
+@media (max-width: 900px) {
+  .two-col { grid-template-columns: 1fr; }
+  .blog-aside { position: static; }
+}
+

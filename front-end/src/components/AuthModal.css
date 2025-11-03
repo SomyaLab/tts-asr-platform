@@ -1,0 +1,41 @@
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+}
+.auth-card {
+  width: min(560px, 92vw);
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  box-shadow: 0 20px 80px rgba(0,0,0,0.35);
+  padding: 24px;
+  position: relative;
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid rgba(255,255,255,0.22);
+}
+.auth-close {
+  position: absolute; right: 8px; top: 6px;
+  border: none; background: transparent; font-size: 24px; cursor: pointer;
+}
+.auth-logo { width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 8px; background: radial-gradient( circle at 30% 30%, #ffb3b3, #ff6b6b ); }
+.auth-title { text-align: center; margin: 0; color: #f3f4f6; }
+.auth-sub { text-align: center; color: #e5e7eb; opacity: 0.8; margin: 6px 0 16px; }
+.auth-providers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+.social { padding: 10px 12px; border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; background: rgba(255,255,255,0.1); color: #f9fafb; font-size: 18px; }
+.auth-sep { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; color: #cbd5e1; margin: 6px 0 12px; }
+.auth-sep::before, .auth-sep::after { content: ''; height: 1px; background: rgba(255,255,255,0.25); display: block; }
+.auth-form { display: flex; flex-direction: column; gap: 8px; }
+.auth-label { font-size: 14px; color: #e5e7eb; }
+.auth-input { border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.06); color: #f9fafb; border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.auth-input::placeholder { color: rgba(255,255,255,0.6); }
+.auth-remember { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.link { border: none; background: transparent; color: #f3f4f6; text-decoration: underline; cursor: pointer; padding: 0; }
+.auth-submit { margin-top: 8px; background: linear-gradient(180deg, #1f2937 0%, #0b1220 100%); color: #fff; border: 1px solid rgba(0,0,0,0.2); border-radius: 12px; padding: 12px 16px; }
+.auth-footer { text-align: center; margin-top: 12px; color: #e5e7eb; }
+.auth-error { color: #fef2f2; background: rgba(185,28,28,0.28); border: 1px solid rgba(185,28,28,0.45); padding: 8px 10px; border-radius: 8px; }
+.auth-step { text-align: center; margin: 0 0 4px; }
+
