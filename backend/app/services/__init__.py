@@ -1,3 +1,2 @@
-__all__ = []
-
+"""Service layer for business logic."""
 

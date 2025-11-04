@@ -1,0 +1,4 @@
+# This directory stores reference voice files
+# Place reference audio files here: {language}/{gender}.mp3
+# Example: en/female.mp3, hi/male.mp3
+

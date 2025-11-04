@@ -1,3 +1,2 @@
-__all__ = []
-
+"""TTS-ASR Platform Backend Application"""
 
