@@ -103,7 +103,6 @@ export default function Home() {
         <div className="blog-header">
           <h2><a href="/blogs/blog-tts" style={{ color: 'inherit', textDecoration: 'none' }}>Blogs</a></h2>
           <a className="blog-viewall" href="/all">View all</a>
-          <p>Practical notes from building AI speech products.</p>
         </div>
         <div className={`blog-grid open-${BLOGS.findIndex(x => x.id === hoveredBlogId) + 1}`} onMouseLeave={() => setHoveredBlogId(BLOGS[0].id)}>
           {BLOGS.slice(0, 3).map(b => (
@@ -136,36 +135,36 @@ export default function Home() {
     {/* Stories section */}
     <section className="stories">
       <div className="stories-wrap">
-        <h2 className="stories-title"><a href="/blogs/blog-tts" style={{ color: 'inherit', textDecoration: 'none' }}>Stories</a></h2>
+        <h2 className="stories-title"><a href="/blogs/blog-tts" style={{ color: 'inherit', textDecoration: 'none' }}>Latest Research</a></h2>
         <div className="stories-grid">
           <a className="story-card span-4" href="#">
             <div className="story-head">
-              <div className="story-eyebrow">What to watch</div>
-              <div className="story-title">Stream the Acme event</div>
+              <div className="story-eyebrow"> </div>
+              <div className="story-title"> </div>
             </div>
             <img className="story-image" src="/Pattern1.png" alt="" />
           </a>
 
           <a className="story-card span-4" href="#">
             <div className="story-head">
-              <div className="story-eyebrow">Plant a tree</div>
-              <div className="story-title">Contribute to the planet</div>
+              <div className="story-eyebrow"> </div>
+              <div className="story-title"></div>
             </div>
             <img className="story-image" src="/Pattern2.png" alt="" />
           </a>
 
           <a className="story-card span-4" href="#">
             <div className="story-head">
-              <div className="story-eyebrow">Supercharged</div>
-              <div className="story-title">Creates beauty like a beast</div>
+              <div className="story-eyebrow"></div>
+              <div className="story-title"></div>
             </div>
             <img className="story-image" src="/Pattern4.png" alt="" />
           </a>
 
           <a className="story-card span-5 with-footer" href="#">
             <div className="story-head">
-              <div className="story-eyebrow">New</div>
-              <div className="story-title big">Acme camera</div>
+              <div className="story-eyebrow"></div>
+              <div className="story-title big"></div>
             </div>
             <img className="story-image scale-zoom" src="/Pattern3.png" alt="" />
             
@@ -173,8 +172,8 @@ export default function Home() {
 
           <a className="story-card span-7 with-footer" href="#">
             <div className="story-head">
-              <div className="story-eyebrow">Your day your way</div>
-              <div className="story-title">Your checklist for better sleep</div>
+              <div className="story-eyebrow"> </div>
+              <div className="story-title"></div>
             </div>
             <img className="story-image" src="/Pattern5.png" alt="" />
             

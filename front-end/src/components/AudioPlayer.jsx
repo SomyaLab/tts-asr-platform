@@ -89,7 +89,7 @@ export default function AudioPlayer({ src, className = '', style, hideControls =
           value={currentTime}
           onChange={onSeek}
           style={{
-            background: `linear-gradient(90deg, #67e6cd 0%, #4472cf ${progressPercent}%, rgba(255,255,255,0.2) ${progressPercent}%, rgba(255,255,255,0.2) 100%)`,
+            background: `linear-gradient(90deg, #4472cf 0%, #67e6cd ${progressPercent}%, rgba(255,255,255,0.2) ${progressPercent}%, rgba(255,255,255,0.2) 100%)`,
           }}
           aria-label="Seek"
         />
