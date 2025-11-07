@@ -21,17 +21,59 @@ export default function Home() {
   const [ttsVoice, setTtsVoice] = useState('female')
   const [ttsSrc, setTtsSrc] = useState('/en-female.mp3')
 
+  // ASR controls
+  const [asrLanguage, setAsrLanguage] = useState('en')
+  const [asrSrc, setAsrSrc] = useState('/en-male.mp3')
+  const [transcribedText, setTranscribedText] = useState('')
+
   // Map languages/voices to files in public/ (update with your real filenames)
   const AUDIO_FILES = {
     en: { female: '/en-female.mp3', male: '/en-male.mp3' },
     hi: { female: '/hi-female.mp3', male: '/hi-male.mp3' },
-    es: { female: '/kn-female.mp3', male: '/kn-male.mp3' }, // Kannada
+    kn: { female: '/kn-female.mp3', male: '/kn-male.mp3' },
+    mr: { female: '/kn-female.mp3', male: '/kn-male.mp3' }, // Using Kannada files as placeholder
+    te: { female: '/kn-female.mp3', male: '/kn-male.mp3' }, // Using Kannada files as placeholder
+    sa: { female: '/kn-female.mp3', male: '/kn-male.mp3' }, // Using Kannada files as placeholder
+  }
+
+  // ASR demo audio files (using male voices for demo)
+  const ASR_AUDIO_FILES = {
+    en: '/en-male.mp3',
+    hi: '/hi-male.mp3',
+    kn: '/kn-male.mp3',
+    mr: '/kn-male.mp3', // Using Kannada files as placeholder
+    te: '/kn-male.mp3', // Using Kannada files as placeholder
+    sa: '/kn-male.mp3', // Using Kannada files as placeholder
+  }
+
+
+  // Demo texts for each language
+  const DEMO_TEXTS = {
+    en: 'We warmly welcome you to Somya Lab, a home for celebrating and preserving the world\'s many voices',
+    kn: 'ಸೋಮ್ಯಾ ಲ್ಯಾಬ್‌ಗೆ ನಿಮಗೆ ಹೃತ್ಪೂರ್ವಕ ಸ್ವಾಗತ, ಇದು ವಿಶ್ವದ ಅನೇಕ ಧ್ವನಿಗಳನ್ನು ಆಚರಿಸುವ ಮತ್ತು ಸಂರಕ್ಷಿಸುವ ಮನೆಯಾಗಿದೆ.',
+    hi: 'सोम्या लैब में आपका हार्दिक स्वागत है, जो दुनिया की अनेकों आवाज़ों का उत्सव मनाने और उन्हें संरक्षित करने का एक घर है।',
+    te: 'సోమ్యా ల్యాబ్‌కు మీకు హృదయపూర్వక స్వాగతం, ఇది ప్రపంచంలోని అనేక స్వరాలను జరుపుకునే మరియు సంరక్షించే నిలయం.',
+    mr: 'सोम्या लॅबमध्ये आपले हार्दिक स्वागत आहे, जे जगातील अनेक आवाजांचा उत्सव साजरा करणारे आणि त्यांना जतन करणारे घर आहे।',
+    sa: 'सोम्या-प्रयोगशालायां भवतः सस्नेहं स्वागतम्। एतत् विश्वस्य विविधानां स्वराणां संरक्षणाय उत्सवाय च एकं गृहम् अस्ति।'
   }
 
   useEffect(() => {
     const path = AUDIO_FILES[ttsLanguage]?.[ttsVoice] ?? '/en-female.mp3'
     setTtsSrc(path)
   }, [ttsLanguage, ttsVoice])
+
+  useEffect(() => {
+    const path = ASR_AUDIO_FILES[asrLanguage] ?? '/en-male.mp3'
+    setAsrSrc(path)
+    // Clear transcribed text when language changes
+    setTranscribedText('')
+  }, [asrLanguage])
+
+  const handleTranscribe = () => {
+    // Show pre-written demo text for selected language
+    const demoText = DEMO_TEXTS[asrLanguage] || DEMO_TEXTS.en
+    setTranscribedText(demoText)
+  }
 
   function goToBlog(id) {
     navigate(`/blogs/${id}`)
@@ -66,16 +108,16 @@ export default function Home() {
         <div className="hero-demo">
           {active === 'Text to Speech' && (
             <div className="demo-card tts">
-              <div className="demo-text">  Welcome the Somya Labs </div>
+              <div className="demo-text">{DEMO_TEXTS[ttsLanguage] || DEMO_TEXTS.en}</div>
               <div style={{ display: 'flex', gap: 24, alignItems: 'center', margin: '24px 24px 24px 24px'}}>
                 <span style={{ opacity: 0.85 }}>Language:</span>
                 <select className="tts-select" value={ttsLanguage} onChange={(e) => setTtsLanguage(e.target.value)}>
                   <option value="en">English</option>
                   <option value="hi">Hindi</option>
-                  <option value="es">Kannada</option>
-                  <option value="es">Telugu</option>
-                  <option value="es">Marathi</option>
-                  <option value="es">Sanskrit</option>
+                  <option value="kn">Kannada</option>
+                  <option value="mr">Marathi</option>
+                  <option value="te">Telugu</option>
+                  <option value="sa">Sanskrit</option>
                 </select>
                 <span style={{ opacity: 0.85}} >Voice:</span>
                 <select className="tts-select" value={ttsVoice} onChange={(e) => setTtsVoice(e.target.value)}>
@@ -89,9 +131,42 @@ export default function Home() {
           )}
           {active === 'Speech to Text' && (
             <div className="demo-card stt" >
-              <AudioPlayer src="/en-male.mp3" />
-              <div className="demo-text" align="left"> Welcome the Somya Labs</div>
-              <p className="demo-note">Speech to Text transcribes spoken audio into text. Play the sample to hear the audio and compare it with the transcript.</p>
+              <AudioPlayer src={asrSrc} />
+              <div style={{ display: 'flex', gap: 16, alignItems: 'center', margin: '24px 24px 16px 24px', flexWrap: 'wrap' }}>
+                <span style={{ opacity: 0.85 }}>Language:</span>
+                <select 
+                  className="tts-select" 
+                  value={asrLanguage} 
+                  onChange={(e) => {
+                    setAsrLanguage(e.target.value)
+                    setTranscribedText('') // Clear text when language changes
+                  }}
+                >
+                  <option value="en">English</option>
+                  <option value="hi">Hindi</option>
+                  <option value="kn">Kannada</option>
+                  <option value="mr">Marathi</option>
+                  <option value="te">Telugu</option>
+                  <option value="sa">Sanskrit</option>
+                </select>
+                <button 
+                  className="transcribe-btn-home"
+                  onClick={handleTranscribe}
+                >
+                  Transcribe
+                </button>
+              </div>
+              <div className="demo-text" align="left" style={{ 
+                margin: '0 24px 16px 24px', 
+                padding: '16px', 
+                backgroundColor: transcribedText ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.05)', 
+                borderRadius: '8px',
+                border: transcribedText ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid rgba(255,255,255,0.1)',
+                minHeight: '60px'
+              }}>
+                {transcribedText || ''}
+              </div>
+              <p className="demo-note">Speech to Text transcribes spoken audio into text. Select a language, play the sample, then click Transcribe to see the result.</p>
             </div>
           )}
         </div>

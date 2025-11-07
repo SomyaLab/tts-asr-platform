@@ -5,6 +5,7 @@ import { HiChatBubbleLeftRight, HiArrowDownTray, HiMiniHome } from 'react-icons/
 import { IoArrowBack, IoMenuOutline, IoClose } from 'react-icons/io5'
 import { IoSunny } from 'react-icons/io5'
 import { FaMoon } from 'react-icons/fa'
+import { getVoiceData, getVoiceDataById, LANGUAGE_NAMES } from '../data/voiceData.js'
 import './VoiceDetail.css'
 import '../pages/Playground.css'
 
@@ -12,18 +13,57 @@ export default function VoiceDetail() {
   const { voiceId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
-  const { voiceName: initialVoiceName, language: initialLanguage } = location.state || {}
+  const { voiceName: initialVoiceName, language: initialLanguage, gender: initialGender } = location.state || {}
   
-  const [voiceName, setVoiceName] = useState(initialVoiceName || 'google')
+  // Try to get voice data from voiceId, language/gender, or defaults
+  const getInitialVoiceData = () => {
+    // Try by voiceId first
+    if (voiceId) {
+      const byId = getVoiceDataById(voiceId)
+      if (byId) return byId
+    }
+    
+    // Try by language and gender from state
+    if (initialLanguage && initialGender) {
+      const byLangGender = getVoiceData(initialLanguage, initialGender)
+      if (byLangGender) return byLangGender
+    }
+    
+    // Try by language only (default to female)
+    if (initialLanguage) {
+      const byLang = getVoiceData(initialLanguage, 'female')
+      if (byLang) return byLang
+    }
+    
+    // Default to English Female
+    return getVoiceData('en', 'female') || {}
+  }
+
+  const initialVoiceData = getInitialVoiceData()
+  
+  const [voiceData, setVoiceData] = useState(initialVoiceData)
+  const [voiceName, setVoiceName] = useState(initialVoiceData.name || initialVoiceName || 'Voice')
   const [isEditing, setIsEditing] = useState(false)
-  const [previewText, setPreviewText] = useState("It's nice to meet you. Hope you're having a great day.")
-  const [language, setLanguage] = useState(initialLanguage || 'en')
-  const [voiceIdValue, setVoiceIdValue] = useState(voiceId || '47a3e1f3-3988-4578-adc0-1b9f96b42c16')
+  const [previewText, setPreviewText] = useState(initialVoiceData.defaultPreviewText || "It's nice to meet you. Hope you're having a great day.")
+  const [language, setLanguage] = useState(initialVoiceData.language || initialLanguage || 'en')
+  const [gender, setGender] = useState(initialVoiceData.gender || initialGender || 'female')
+  const [voiceIdValue, setVoiceIdValue] = useState(initialVoiceData.voiceId || voiceId || 'en-female-001')
   const [isPlaying, setIsPlaying] = useState(false)
   const [theme, setTheme] = useState('light')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const [isSmallScreen, setIsSmallScreen] = useState(false)
+
+  // Update voice data when language or gender changes
+  useEffect(() => {
+    const newVoiceData = getVoiceData(language, gender)
+    if (newVoiceData) {
+      setVoiceData(newVoiceData)
+      setVoiceName(newVoiceData.name)
+      setPreviewText(newVoiceData.defaultPreviewText)
+      setVoiceIdValue(newVoiceData.voiceId)
+    }
+  }, [language, gender])
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light'
@@ -157,37 +197,59 @@ export default function VoiceDetail() {
         <div className="voice-detail-container">
           {/* Breadcrumb Navigation */}
           <div className="voice-detail-breadcrumb">
-            <Link to="/playground" className="breadcrumb-link">My Voices</Link>
+            <Link to="/playground?view=voices" className="breadcrumb-link">Voices</Link>
             <span className="breadcrumb-separator">›</span>
             <span className="breadcrumb-current">{voiceName}</span>
           </div>
 
           {/* Header Section */}
           <div className="voice-detail-header">
-        <div className="voice-detail-title-section">
-          {isEditing ? (
-            <input
-              type="text"
-              value={voiceName}
-              onChange={(e) => setVoiceName(e.target.value)}
-              onBlur={() => setIsEditing(false)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') setIsEditing(false)
-              }}
-              className="voice-name-input"
-              autoFocus
-            />
-          ) : (
-            <h1 className="voice-detail-title">{voiceName}</h1>
-          )}
-          <button 
-            className="voice-edit-btn"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            Edit
-          </button>
-        </div>
-      </div>
+            <div className="voice-detail-header-content">
+              {/* Voice Image */}
+              {voiceData.image && (
+                <div className="voice-detail-image-container">
+                  <img 
+                    src={voiceData.image} 
+                    alt={voiceData.displayName || voiceName}
+                    className="voice-detail-image"
+                    onError={(e) => {
+                      e.target.src = '/male.png' // Fallback image
+                    }}
+                  />
+                </div>
+              )}
+              
+              {/* Title and Description */}
+              <div className="voice-detail-title-section">
+                <div className="voice-detail-title-row">
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={voiceName}
+                      onChange={(e) => setVoiceName(e.target.value)}
+                      onBlur={() => setIsEditing(false)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') setIsEditing(false)
+                      }}
+                      className="voice-name-input"
+                      autoFocus
+                    />
+                  ) : (
+                    <h1 className="voice-detail-title">{voiceData.displayName || voiceName}</h1>
+                  )}
+                  <button 
+                    className="voice-edit-btn"
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    Edit
+                  </button>
+                </div>
+                {voiceData.description && (
+                  <p className="voice-detail-description">{voiceData.description}</p>
+                )}
+              </div>
+            </div>
+          </div>
 
       {/* Preview Section */}
       <div className="voice-detail-section">
@@ -233,7 +295,7 @@ export default function VoiceDetail() {
             <div className="metadata-value-container">
               <input
                 type="text"
-                value={language}
+                value={voiceData.languageName || LANGUAGE_NAMES[language] || language.toUpperCase()}
                 readOnly
                 className="metadata-input"
               />
@@ -247,7 +309,43 @@ export default function VoiceDetail() {
             </div>
           </div>
           <div className="metadata-item">
-            <span className="metadata-label">ID:</span>
+            <span className="metadata-label">Language Code:</span>
+            <div className="metadata-value-container">
+              <input
+                type="text"
+                value={language}
+                readOnly
+                className="metadata-input"
+              />
+              <button 
+                className="copy-btn"
+                onClick={() => handleCopy(language)}
+                aria-label="Copy language code"
+              >
+                <FaCopy />
+              </button>
+            </div>
+          </div>
+          <div className="metadata-item">
+            <span className="metadata-label">Gender:</span>
+            <div className="metadata-value-container">
+              <input
+                type="text"
+                value={gender.charAt(0).toUpperCase() + gender.slice(1)}
+                readOnly
+                className="metadata-input"
+              />
+              <button 
+                className="copy-btn"
+                onClick={() => handleCopy(gender)}
+                aria-label="Copy gender"
+              >
+                <FaCopy />
+              </button>
+            </div>
+          </div>
+          <div className="metadata-item">
+            <span className="metadata-label">Voice ID:</span>
             <div className="metadata-value-container">
               <input
                 type="text"
@@ -264,6 +362,110 @@ export default function VoiceDetail() {
               </button>
             </div>
           </div>
+          {voiceData.metadata && (
+            <>
+              {voiceData.metadata.age && (
+                <div className="metadata-item">
+                  <span className="metadata-label">Age:</span>
+                  <div className="metadata-value-container">
+                    <input
+                      type="text"
+                      value={voiceData.metadata.age}
+                      readOnly
+                      className="metadata-input"
+                    />
+                    <button 
+                      className="copy-btn"
+                      onClick={() => handleCopy(voiceData.metadata.age)}
+                      aria-label="Copy age"
+                    >
+                      <FaCopy />
+                    </button>
+                  </div>
+                </div>
+              )}
+              {voiceData.metadata.accent && (
+                <div className="metadata-item">
+                  <span className="metadata-label">Accent:</span>
+                  <div className="metadata-value-container">
+                    <input
+                      type="text"
+                      value={voiceData.metadata.accent}
+                      readOnly
+                      className="metadata-input"
+                    />
+                    <button 
+                      className="copy-btn"
+                      onClick={() => handleCopy(voiceData.metadata.accent)}
+                      aria-label="Copy accent"
+                    >
+                      <FaCopy />
+                    </button>
+                  </div>
+                </div>
+              )}
+              {voiceData.metadata.useCase && (
+                <div className="metadata-item">
+                  <span className="metadata-label">Use Case:</span>
+                  <div className="metadata-value-container">
+                    <input
+                      type="text"
+                      value={voiceData.metadata.useCase}
+                      readOnly
+                      className="metadata-input"
+                    />
+                    <button 
+                      className="copy-btn"
+                      onClick={() => handleCopy(voiceData.metadata.useCase)}
+                      aria-label="Copy use case"
+                    >
+                      <FaCopy />
+                    </button>
+                  </div>
+                </div>
+              )}
+              {voiceData.metadata.quality && (
+                <div className="metadata-item">
+                  <span className="metadata-label">Quality:</span>
+                  <div className="metadata-value-container">
+                    <input
+                      type="text"
+                      value={voiceData.metadata.quality}
+                      readOnly
+                      className="metadata-input"
+                    />
+                    <button 
+                      className="copy-btn"
+                      onClick={() => handleCopy(voiceData.metadata.quality)}
+                      aria-label="Copy quality"
+                    >
+                      <FaCopy />
+                    </button>
+                  </div>
+                </div>
+              )}
+              {voiceData.metadata.tone && (
+                <div className="metadata-item">
+                  <span className="metadata-label">Tone:</span>
+                  <div className="metadata-value-container">
+                    <input
+                      type="text"
+                      value={voiceData.metadata.tone}
+                      readOnly
+                      className="metadata-input"
+                    />
+                    <button 
+                      className="copy-btn"
+                      onClick={() => handleCopy(voiceData.metadata.tone)}
+                      aria-label="Copy tone"
+                    >
+                      <FaCopy />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 

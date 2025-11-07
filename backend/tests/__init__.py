@@ -1,2 +1,2 @@
-"""Test suite for the backend application."""
+"""Test package for TTS-ASR Platform backend."""
 

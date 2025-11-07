@@ -1,10 +1,9 @@
 """Automatic Speech Recognition service."""
 import logging
-import os
+import base64
 import httpx
 from typing import Optional
 from app.config import settings
-from app.utils.file_utils import temporary_audio_file
 
 
 logger = logging.getLogger(__name__)
@@ -15,7 +14,7 @@ class ASRService:
     
     def __init__(self):
         """Initialize ASR service."""
-        self.model_url = settings.ASR_MODEL_URL
+        self.model_url = settings.MODEL_BASE_URL
         self.timeout = 300.0  # 300 seconds timeout for longer audio files
         # Create a persistent async client for connection pooling
         self._client: Optional[httpx.AsyncClient] = None
@@ -32,73 +31,73 @@ class ASRService:
     async def transcribe(
         self,
         audio_content: bytes,
-        filename: str = "audio.wav",
-        language: Optional[str] = None
+        language: str = None
     ) -> Optional[str]:
         """
         Transcribe audio to text using LitServe server.
         
         Args:
             audio_content: Audio file content as bytes
-            filename: Original filename (used to determine file extension)
-            language: Language code hint (optional, not used by LitServe but kept for compatibility)
+            language: Language code
             
         Returns:
             Transcribed text, or None if transcription fails
         """
-        # Determine file extension from filename
-        _, ext = os.path.splitext(filename)
-        if not ext:
-            ext = ".wav"  # Default to .wav
-        
-        # Save audio bytes to temporary file for LitServe (which expects file path)
-        with temporary_audio_file(audio_content, suffix=ext) as temp_file_path:
-            try:
-                # Prepare LitServe request payload
-                payload = {
-                    "endpoint": "asr",
-                    "audio_file": temp_file_path
-                }
+        try:
+            # Convert audio bytes to base64
+            audio_base64 = base64.b64encode(audio_content).decode('utf-8')
+            
+            # Prepare LitServe request payload
+            payload = {
+                "endpoint": "asr",
+                "audio_base64": audio_base64
+            }
+            
+            # Add language if provided
+            if language:
+                payload["language"] = language
+            
+            logger.info(f"Sending ASR request: language={language}, audio_size={len(audio_content)} bytes")
+            
+            # Make request to LitServe server
+            client = await self._get_client()
+            response = await client.post(
+                f"{self.model_url}/predict",
+                json=payload,
+                headers={"Content-Type": "application/json"}
+            )
+            
+            if response.status_code == 200:
+                # Parse LitServe response
+                result = response.json()
                 
-                # Make request to LitServe server
-                client = await self._get_client()
-                response = await client.post(
-                    self.model_url,
-                    json=payload,
-                    headers={"Content-Type": "application/json"}
-                )
-                
-                if response.status_code == 200:
-                    # Parse LitServe response
-                    result = response.json()
-                    
-                    if result.get("success", False):
-                        # Extract transcription from response
-                        transcription = result.get("transcription", "")
-                        if transcription:
-                            logger.info(f"ASR transcription successful: {len(transcription)} characters")
-                            return transcription
-                        else:
-                            logger.warning("LitServe response missing transcription")
-                            return None
+                if result.get("success", False):
+                    # Extract transcription from response
+                    transcription = result.get("transcription", "")
+                    if transcription:
+                        logger.info(f"ASR transcription successful: {len(transcription)} characters")
+                        return transcription
                     else:
-                        error_msg = result.get("message", "Unknown error")
-                        error_code = result.get("error", "UNKNOWN_ERROR")
-                        logger.error(f"LitServe ASR failed: {error_code} - {error_msg}")
+                        logger.warning("LitServe response missing transcription")
                         return None
                 else:
-                    logger.error(f"LitServe server returned status {response.status_code}: {response.text}")
+                    error_msg = result.get("message", "Unknown error")
+                    error_code = result.get("error", "UNKNOWN_ERROR")
+                    logger.error(f"LitServe ASR failed: {error_code} - {error_msg}")
                     return None
+            else:
+                logger.error(f"LitServe server returned status {response.status_code}: {response.text}")
+                return None
                     
-            except httpx.TimeoutException:
-                logger.error("ASR model request timed out")
-                return None
-            except httpx.RequestError as e:
-                logger.error(f"Request error calling LitServe: {e}")
-                return None
-            except Exception as e:
-                logger.error(f"Error calling ASR model: {e}", exc_info=True)
-                return None
+        except httpx.TimeoutException:
+            logger.error("ASR model request timed out")
+            return None
+        except httpx.RequestError as e:
+            logger.error(f"Request error calling LitServe: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Error calling ASR model: {e}", exc_info=True)
+            return None
     
     async def is_available(self) -> bool:
         """
@@ -112,7 +111,7 @@ class ASRService:
             # Call LitServe health endpoint
             payload = {"endpoint": "health"}
             response = await client.post(
-                self.model_url,
+                f"{self.model_url}/health",
                 json=payload,
                 headers={"Content-Type": "application/json"},
                 timeout=5.0

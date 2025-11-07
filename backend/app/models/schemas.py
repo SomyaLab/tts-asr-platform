@@ -6,11 +6,10 @@ from typing import Optional, List
 class TTSRequest(BaseModel):
     """Request schema for Text-to-Speech."""
     text: str = Field(..., min_length=1, max_length=5000, description="Text to convert to speech")
-    voice: Optional[str] = Field(default="Tessa", description="Voice name")
-    language: Optional[str] = Field(default="en", description="Language code")
-    speed: Optional[float] = Field(default=1.0, ge=0.5, le=2.0, description="Speech speed multiplier")
-    volume: Optional[float] = Field(default=1.0, ge=0.0, le=2.0, description="Volume multiplier")
-    emotion: Optional[str] = Field(default="neutral", description="Emotion for speech")
+    voice: str = Field(..., description="Voice name (e.g., 'diana', 'patrick', 'pooja', 'surya')")
+    cloneing: Optional[bool] = Field(default=False, description="Enable voice cloning")
+    ref_speker_base64: Optional[str] = Field(default=None, description="Base64 encoded reference audio for cloning")
+    ref_speker_name: Optional[str] = Field(default=None, description="Name for the cloned voice")
 
 
 class ASRResponse(BaseModel):
@@ -23,7 +22,7 @@ class ASRResponse(BaseModel):
 class ReferenceVoice(BaseModel):
     """Schema for reference voice information."""
     language: str
-    gender: str
+    voice_name: str
     url: str
     available: bool
 

@@ -1,7 +1,6 @@
 """Automatic Speech Recognition API endpoints."""
 import logging
 from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form, Request
-from typing import Optional
 from app.models.schemas import ASRResponse
 from app.services.asr_service import asr_service
 from app.services.audio_service import AudioService
@@ -18,14 +17,14 @@ audio_service = AudioService()
 async def speech_to_text(
     request: Request,
     audio: UploadFile = File(..., description="Audio file to transcribe"),
-    language: Optional[str] = Form(None, description="Language code hint")
+    language: str = Form(..., description="Language code (required)")
 ):
     """
     Transcribe audio to text.
     
     Args:
         audio: Audio file (MP3, WAV, M4A, WebM, etc.)
-        language: Optional language code hint
+        language: Language code (required)
         
     Returns:
         Transcribed text
@@ -51,7 +50,6 @@ async def speech_to_text(
         # Transcribe audio
         transcribed_text = await asr_service.transcribe(
             processed_audio,
-            filename=filename,
             language=language
         )
         

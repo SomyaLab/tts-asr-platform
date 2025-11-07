@@ -23,8 +23,8 @@ async def list_reference_voices():
         voices = [
             ReferenceVoice(
                 language=v["language"],
-                gender=v["gender"],
-                url=f"/api/v1/voices/reference/{v['language']}/{v['gender']}",
+                voice_name=v["voice_name"],
+                url=f"/api/v1/voices/reference/{v['language']}/{v['voice_name']}",
                 available=v["available"]
             )
             for v in voices_data
@@ -38,61 +38,7 @@ async def list_reference_voices():
         )
 
 
-@router.get("/voices/reference/{language}/{gender}")
-async def get_reference_voice(
-    language: str = Path(..., description="Language code"),
-    gender: str = Path(..., description="Gender (male or female)")
-):
-    """
-    Get reference voice audio file.
-    
-    Args:
-        language: Language code (en, hi, kn, te, ma, sa)
-        gender: Gender (male or female)
-        
-    Returns:
-        Audio file (MP3 format)
-    """
-    try:
-        # Validate language and gender
-        if language not in settings.SUPPORTED_LANGUAGES:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unsupported language: {language}. Supported languages: {', '.join(settings.SUPPORTED_LANGUAGES)}"
-            )
-        
-        if gender not in settings.SUPPORTED_GENDERS:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unsupported gender: {gender}. Supported genders: {', '.join(settings.SUPPORTED_GENDERS)}"
-            )
-        
-        # Get reference voice
-        audio_content = voice_service.get_reference_voice(language, gender)
-        
-        if audio_content is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Reference voice not found for language '{language}' and gender '{gender}'"
-            )
-        
-        # Determine content type based on file extension
-        content_type = "audio/mpeg"  # Default to MP3
-        
-        return Response(
-            content=audio_content,
-            media_type=content_type,
-            headers={
-                "Content-Disposition": f"attachment; filename={language}-{gender}.mp3"
-            }
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error getting reference voice: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while retrieving the reference voice."
-        )
+# Note: Reference voice files are now managed by the model server.
+# This endpoint is kept for API compatibility but voices should be accessed
+# directly from the model server if needed.
 

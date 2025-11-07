@@ -15,13 +15,8 @@ class Settings(BaseSettings):
     # LitServe Server Configuration
     LITSERVE_SERVER_URL: str = "http://localhost:8000"
     
-    # Model Endpoints (point to LitServe /predict endpoint)
-    ASR_MODEL_URL: str = ""
-    TTS_MODEL_URL: str = ""
-    
-    # Storage Configuration
-    STORAGE_PATH: str = os.path.join(os.path.dirname(__file__), "..", "storage")
-    REFERENCE_VOICES_PATH: str = ""
+    # Model Base URL (points to LitServe /predict endpoint)
+    MODEL_BASE_URL: str = ""
     
     # Audio Processing Configuration
     MAX_AUDIO_SIZE_MB: int = 50
@@ -51,15 +46,10 @@ class Settings(BaseSettings):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Set REFERENCE_VOICES_PATH after initialization
-        if not self.REFERENCE_VOICES_PATH:
-            self.REFERENCE_VOICES_PATH = os.path.join(self.STORAGE_PATH, "reference_voices")
         
-        # Set model URLs to LitServe /predict endpoint if not explicitly set
-        if not self.ASR_MODEL_URL:
-            self.ASR_MODEL_URL = f"{self.LITSERVE_SERVER_URL.rstrip('/')}/predict"
-        if not self.TTS_MODEL_URL:
-            self.TTS_MODEL_URL = f"{self.LITSERVE_SERVER_URL.rstrip('/')}/predict"
+        # Set MODEL_BASE_URL to LitServe /predict endpoint if not explicitly set
+        if not self.MODEL_BASE_URL:
+            self.MODEL_BASE_URL = f"{self.LITSERVE_SERVER_URL.rstrip('/')}/predict"
     
     @property
     def CORS_ORIGINS(self) -> List[str]:

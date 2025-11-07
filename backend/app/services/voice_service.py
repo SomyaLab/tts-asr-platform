@@ -1,7 +1,6 @@
 """Voice management service."""
 import logging
 from typing import List, Optional
-from app.storage.local_storage import storage
 from app.config import settings
 
 
@@ -15,33 +14,29 @@ class VoiceService:
     def get_reference_voices() -> List[dict]:
         """
         Get list of available reference voices.
+        Voices are managed by the model server, so we return a static list
+        based on known voice names.
         
         Returns:
             List of voice dictionaries
         """
-        return storage.list_reference_voices()
-    
-    @staticmethod
-    def get_reference_voice(language: str, gender: str) -> Optional[bytes]:
-        """
-        Get reference voice audio file.
-        
-        Args:
-            language: Language code
-            gender: Gender ('male' or 'female')
-            
-        Returns:
-            Audio file content as bytes, or None if not found
-        """
-        if language not in settings.SUPPORTED_LANGUAGES:
-            logger.warning(f"Unsupported language: {language}")
-            return None
-        
-        if gender not in settings.SUPPORTED_GENDERS:
-            logger.warning(f"Unsupported gender: {gender}")
-            return None
-        
-        return storage.read_reference_voice(language, gender)
+        # Voice names mapped by language and gender
+        # These match the voice names used in the frontend and model server
+        voices = [
+            {"language": "en", "voice_name": "patrick", "available": True},
+            {"language": "en", "voice_name": "diana", "available": True},
+            {"language": "hi", "voice_name": "surya", "available": True},
+            {"language": "hi", "voice_name": "pooja", "available": True},
+            {"language": "kn", "voice_name": "ranna", "available": True},
+            {"language": "kn", "voice_name": "vidhya", "available": True},
+            {"language": "te", "voice_name": "arush", "available": True},
+            {"language": "te", "voice_name": "bhagya", "available": True},
+            {"language": "ma", "voice_name": "kabir", "available": True},
+            {"language": "ma", "voice_name": "neha", "available": True},
+            {"language": "sa", "voice_name": "raghava", "available": True},
+            {"language": "sa", "voice_name": "janki", "available": True},
+        ]
+        return voices
     
     @staticmethod
     def get_example_texts(language: Optional[str] = None) -> List[dict]:

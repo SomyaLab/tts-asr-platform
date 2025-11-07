@@ -25,21 +25,25 @@ async def text_to_speech(request: Request, tts_request: TTSRequest):
         Audio file (WAV format)
     """
     try:
+        logger.info(f"Received TTS request: text='{tts_request.text[:50]}...', voice={tts_request.voice}, cloneing={tts_request.cloneing}")
+        
         # Synthesize speech
         audio_content = await tts_service.synthesize(
             text=tts_request.text,
             voice=tts_request.voice,
-            language=tts_request.language,
-            speed=tts_request.speed,
-            volume=tts_request.volume,
-            emotion=tts_request.emotion
+            cloneing=tts_request.cloneing or False,
+            ref_speker_base64=tts_request.ref_speker_base64,
+            ref_speker_name=tts_request.ref_speker_name
         )
         
         if audio_content is None:
+            logger.warning(f"TTS service returned None for voice={tts_request.voice}")
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="TTS service is currently unavailable. Please try again later."
+                detail=f"TTS service is unavailable for voice '{tts_request.voice}'. Please try again later."
             )
+        
+        logger.info(f"TTS synthesis successful: {len(audio_content)} bytes")
         
         # Return audio response
         return Response(
@@ -50,12 +54,13 @@ async def text_to_speech(request: Request, tts_request: TTSRequest):
             }
         )
         
-    except HTTPException:
+    except HTTPException as e:
+        logger.warning(f"HTTPException in TTS endpoint: {e.status_code} - {e.detail}")
         raise
     except Exception as e:
-        logger.error(f"Error in TTS endpoint: {e}")
+        logger.error(f"Error in TTS endpoint: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while processing your request."
+            detail=f"An error occurred while processing your request: {str(e)}"
         )
 

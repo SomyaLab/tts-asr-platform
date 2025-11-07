@@ -26,6 +26,19 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
+def get_file_extension(filename: str) -> str:
+    """
+    Get file extension from filename.
+    
+    Args:
+        filename: Filename to extract extension from
+        
+    Returns:
+        File extension including the dot (e.g., '.mp3'), or empty string if no extension
+    """
+    return os.path.splitext(filename)[1]
+
+
 def validate_audio_file(file_content: bytes, filename: str) -> Tuple[bool, Optional[str]]:
     """
     Validate audio file.

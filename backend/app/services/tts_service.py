@@ -4,8 +4,6 @@ import base64
 import httpx
 from typing import Optional
 from app.config import settings
-from app.services.voice_service import voice_service
-from app.storage.local_storage import storage
 
 
 logger = logging.getLogger(__name__)
@@ -16,7 +14,7 @@ class TTSService:
     
     def __init__(self):
         """Initialize TTS service."""
-        self.model_url = settings.TTS_MODEL_URL
+        self.model_url = settings.MODEL_BASE_URL
         self.timeout = 300.0  # 300 seconds timeout for long texts
         # Create a persistent async client for connection pooling
         self._client: Optional[httpx.AsyncClient] = None
@@ -30,88 +28,50 @@ class TTSService:
             )
         return self._client
     
-    def _get_speaker_audio_file(self, language: Optional[str], voice: Optional[str]) -> Optional[str]:
-        """
-        Get speaker audio file path based on language and voice.
-        
-        Args:
-            language: Language code (e.g., 'en', 'hi')
-            voice: Voice name (used to infer gender if available)
-            
-        Returns:
-            Path to speaker audio file, or None if not found
-        """
-        # Default to English if language not provided
-        lang = language or "en"
-        
-        # Try to infer gender from voice name (simple heuristic)
-        # This can be enhanced based on your voice naming convention
-        gender = "female"  # default
-        if voice:
-            voice_lower = voice.lower()
-            # Simple heuristic - can be improved
-            if any(male_indicator in voice_lower for male_indicator in ["male", "john", "mike", "david"]):
-                gender = "male"
-        
-        # Get speaker audio file path
-        speaker_path = storage.get_reference_voice_path(lang, gender)
-        
-        # Check if file exists
-        if storage.reference_voice_exists(lang, gender):
-            return speaker_path
-        
-        # Fallback: try to find any available voice for the language
-        voices = storage.list_reference_voices()
-        for v in voices:
-            if v['language'] == lang and v['available']:
-                return v['path']
-        
-        logger.warning(f"No speaker audio file found for language={lang}, gender={gender}")
-        return None
-    
     async def synthesize(
         self,
         text: str,
-        voice: Optional[str] = None,
-        language: Optional[str] = None,
-        speed: Optional[float] = None,
-        volume: Optional[float] = None,
-        emotion: Optional[str] = None
+        voice: str,
+        cloneing: bool = False,
+        ref_speker_base64: Optional[str] = None,
+        ref_speker_name: Optional[str] = None
     ) -> Optional[bytes]:
         """
         Synthesize speech from text using LitServe server.
         
         Args:
             text: Text to synthesize
-            voice: Voice name (optional, used to infer gender)
-            language: Language code (optional, defaults to 'en')
-            speed: Speech speed (optional, not used by LitServe but kept for compatibility)
-            volume: Volume level (optional, not used by LitServe but kept for compatibility)
-            emotion: Emotion for speech (optional, not used by LitServe but kept for compatibility)
+            voice: Voice name (e.g., 'diana', 'patrick', 'pooja', 'surya')
+            cloneing: Whether to enable voice cloning
+            ref_speker_base64: Base64 encoded reference audio for cloning (optional)
+            ref_speker_name: Name for the cloned voice (optional)
             
         Returns:
             Audio content as bytes, or None if synthesis fails
         """
         try:
-            # Get speaker audio file path
-            speaker_audio_file = self._get_speaker_audio_file(language, voice)
-            if not speaker_audio_file:
-                logger.error(f"Speaker audio file not found for language={language}, voice={voice}")
-                return None
-            
             # Prepare LitServe request payload
             payload = {
                 "endpoint": "tts",
                 "text": text,
-                "speaker_audio_file": speaker_audio_file,
-                "return_base64": True,
-                "max_chunk_len": 250  # Default chunk length for long texts
+                "voice": voice,
+                "return_base64": True
             }
+            
+            # Add cloning parameters if enabled
+            if cloneing:
+                payload["cloneing"] = True
+                if ref_speker_base64:
+                    payload["ref_speker_base64"] = ref_speker_base64
+                if ref_speker_name:
+                    payload["ref_speker_name"] = ref_speker_name
+            
+            logger.info(f"Sending TTS request: voice={voice}, cloneing={cloneing}, text_length={len(text)}")
             
             # Make request to LitServe server
             client = await self._get_client()
             response = await client.post(
-                self.model_url,
+                f"{self.model_url}/predict",
                 json=payload,
                 headers={"Content-Type": "application/json"}
             )
@@ -165,7 +125,7 @@ class TTSService:
             # Call LitServe health endpoint
             payload = {"endpoint": "health"}
             response = await client.post(
-                self.model_url,
+                f"{self.model_url}/health",
                 json=payload,
                 headers={"Content-Type": "application/json"},
                 timeout=5.0

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../AuthContext.jsx'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import './Playground.css'
 import { FaPlay, FaMicrophone, FaUser, FaPause } from 'react-icons/fa'
 import { HiSpeakerWave, HiSpeakerXMark, HiMiniHome, HiPaperClip, HiChevronDown } from 'react-icons/hi2'
@@ -11,13 +11,17 @@ import { IoSunny } from 'react-icons/io5'
 import { FaMoon, FaCloudUploadAlt } from 'react-icons/fa'
 import { BsThreeDotsVertical } from 'react-icons/bs'
 import AudioPlayer from '../components/AudioPlayer.jsx'
+import { getAllVoices } from '../data/voiceData.js'
 
 export default function Playground() {
   const { user, signInWithGoogle, signInWithApple } = useAuth()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [textToSpeak, setTextToSpeak] = useState('')
-  const [selectedModel, setSelectedModel] = useState('Sonic 3.0')
-  const [selectedVoice, setSelectedVoice] = useState('Tessa')
+  const [selectedModel, setSelectedModel] = useState('Panini 0.1')
+  const [selectedVoice, setSelectedVoice] = useState('diana') // Default to first English voice
+  const [ttsLanguage, setTtsLanguage] = useState('en')
+  const [availableVoices, setAvailableVoices] = useState([])
   const [transcriptLanguage, setTranscriptLanguage] = useState('')
   const [speed, setSpeed] = useState(1.0)
   const [volume, setVolume] = useState(1.0)
@@ -32,10 +36,11 @@ export default function Playground() {
   const [tempControlValue, setTempControlValue] = useState(null)
   const [isMobile, setIsMobile] = useState(false)
   const [isSmallScreen, setIsSmallScreen] = useState(false)
-  const [activeView, setActiveView] = useState('text-to-speech') // 'text-to-speech', 'instant-clone', or 'speech-to-text'
+  const [activeView, setActiveView] = useState('text-to-speech') // 'text-to-speech', 'instant-clone', 'speech-to-text', or 'voices'
   const [inputMethod, setInputMethod] = useState('record') // 'record' or 'upload'
   const [transcribedText, setTranscribedText] = useState('')
   const [isTranscribing, setIsTranscribing] = useState(false)
+  const [asrLanguage, setAsrLanguage] = useState('en')
   const speechToTextFileInputRef = useRef(null)
   const [cloneName, setCloneName] = useState('')
   const [cloneDescription, setCloneDescription] = useState('')
@@ -53,7 +58,10 @@ export default function Playground() {
   const animationFrameRef = useRef(null)
   const startTimeRef = useRef(null)
   const fileInputRef = useRef(null)
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  // Fix API base URL - remove trailing /api if present to avoid double /api/api
+  // Note: 0.0.0.0 is not accessible from browsers, use localhost or actual hostname
+  const rawApiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'
+  const API_BASE = rawApiBase.replace(/\/api\/?$/, '')
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light'
@@ -78,6 +86,93 @@ export default function Playground() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  // Handle URL parameter for view selection
+  useEffect(() => {
+    const viewParam = searchParams.get('view')
+    if (viewParam && ['text-to-speech', 'instant-clone', 'speech-to-text', 'voices'].includes(viewParam)) {
+      setActiveView(viewParam)
+    }
+  }, [searchParams])
+
+  // Helper function to update view and URL parameter
+  const handleViewChange = (view) => {
+    setActiveView(view)
+    const newSearchParams = new URLSearchParams(searchParams)
+    if (view === 'text-to-speech') {
+      // Remove view param for default view
+      newSearchParams.delete('view')
+    } else {
+      newSearchParams.set('view', view)
+    }
+    setSearchParams(newSearchParams, { replace: true })
+  }
+
+  // Fetch available voices from API, fallback to local voice data
+  useEffect(() => {
+    const fetchVoices = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/voices/reference`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.voices && data.voices.length > 0) {
+            // Check if any voices are available
+            const availableCount = data.voices.filter(v => v.available).length
+            if (availableCount > 0) {
+              setAvailableVoices(data.voices)
+              // Set default voice to first available voice for default language
+              const defaultLangVoices = data.voices.filter(v => v.language === ttsLanguage && v.available)
+              if (defaultLangVoices.length > 0) {
+                setSelectedVoice(defaultLangVoices[0].voice_name)
+              }
+              return
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching voices:', error)
+      }
+      // Fallback to local voice data if API fails, returns empty, or all voices unavailable
+      // Map local voices to match API format with voice_name
+      // Use the actual voice name from voiceData.js (which now has patrick, diana, etc.)
+      const localVoices = getAllVoices().map(voice => ({
+        language: voice.language,
+        voice_name: voice.name, // Use the actual name field which now contains patrick, diana, etc.
+        available: true,
+        voiceId: voice.voiceId
+      }))
+      setAvailableVoices(localVoices)
+      
+      // Set default voice to first available voice for default language
+      if (localVoices.length > 0) {
+        const defaultLangVoices = localVoices.filter(v => v.language === ttsLanguage && v.available)
+        if (defaultLangVoices.length > 0) {
+          setSelectedVoice(defaultLangVoices[0].voice_name)
+        }
+      }
+    }
+    fetchVoices()
+  }, [])
+
+  // Filter voices by selected language
+  const filteredVoices = availableVoices.filter(voice => 
+    voice.language === ttsLanguage && voice.available
+  )
+
+  // Update selected voice when language changes - use first available voice for the language
+  useEffect(() => {
+    const voicesForLanguage = availableVoices.filter(voice => 
+      voice.language === ttsLanguage && voice.available
+    )
+    if (voicesForLanguage.length > 0) {
+      // Check if current voice is available for this language
+      const currentVoiceAvailable = voicesForLanguage.find(v => v.voice_name === selectedVoice)
+      if (!currentVoiceAvailable) {
+        // Use first available voice for the language
+        setSelectedVoice(voicesForLanguage[0].voice_name)
+      }
+    }
+  }, [ttsLanguage, availableVoices, selectedVoice])
+
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
     setTheme(newTheme)
@@ -85,25 +180,76 @@ export default function Playground() {
     document.documentElement.setAttribute('data-theme', newTheme)
   }
 
+  // Helper function to convert blob to base64
+  const blobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64String = reader.result.split(',')[1]
+        resolve(base64String)
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+  }
+
   const handleSpeak = async () => {
     if (isSending || !textToSpeak.trim()) return
     setIsSending(true)
     try {
-      const response = await fetch(`${API_BASE}/tts`, {
+      const requestBody = { 
+        text: textToSpeak.trim(),
+        voice: selectedVoice
+      }
+      console.log('Sending TTS request to:', `${API_BASE}/api/v1/tts`, requestBody)
+      
+      // Create AbortController for timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 second timeout
+      
+      const response = await fetch(`${API_BASE}/api/v1/tts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: textToSpeak.trim() })
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
       })
+      
+      clearTimeout(timeoutId)
+      
+      console.log('TTS response status:', response.status, response.statusText)
+      console.log('TTS response headers:', Object.fromEntries(response.headers.entries()))
+      
       if (!response.ok) {
-        const errText = await response.text().catch(() => '')
-        throw new Error(errText || `Request failed with status ${response.status}`)
+        let errorMessage = `Request failed with status ${response.status}`
+        try {
+          const errorData = await response.json().catch(() => null)
+          if (errorData && errorData.detail) {
+            errorMessage = errorData.detail
+          } else {
+            const errorText = await response.text().catch(() => '')
+            if (errorText) {
+              errorMessage = errorText
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing error response:', e)
+        }
+        console.error('TTS error:', errorMessage)
+        throw new Error(errorMessage)
       }
 
       const blob = await response.blob()
+      console.log('Received audio blob, size:', blob.size, 'type:', blob.type)
+      
+      if (blob.size === 0) {
+        throw new Error('Received empty audio file from server')
+      }
+      
       const url = URL.createObjectURL(blob)
       setAudioUrl(url)
       const audio = new Audio(url)
-      audio.play().catch(() => {
+      audio.play().catch((playError) => {
+        console.warn('Autoplay blocked, triggering download:', playError)
         // Fall back to triggering a download if autoplay is blocked
         const a = document.createElement('a')
         a.href = url
@@ -113,9 +259,20 @@ export default function Playground() {
         a.remove()
       })
       audio.onended = () => URL.revokeObjectURL(url)
+      console.log('TTS audio playback started')
     } catch (err) {
-      console.error(err)
-      alert('Failed to generate speech. Please try again.')
+      console.error('TTS error:', err)
+      let errorMessage = 'Failed to generate speech. Please try again.'
+      
+      if (err.name === 'AbortError') {
+        errorMessage = 'Request timed out. The server is taking too long to respond. Please check if the backend server is running and accessible.'
+      } else if (err.message && err.message.includes('Failed to fetch')) {
+        errorMessage = 'Unable to connect to the server. Please check:\n1. The backend server is running\n2. The API URL is correct\n3. CORS is properly configured\n4. Network connectivity'
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+      
+      alert(`Error: ${errorMessage}`)
     } finally {
       setIsSending(false)
     }
@@ -141,14 +298,10 @@ export default function Playground() {
   const handleControlDone = () => {
     if (selectedControl === 'model') {
       setSelectedModel(tempControlValue)
+    } else if (selectedControl === 'language') {
+      setTtsLanguage(tempControlValue)
     } else if (selectedControl === 'voice') {
       setSelectedVoice(tempControlValue)
-    } else if (selectedControl === 'language') {
-      setTranscriptLanguage(tempControlValue)
-    } else if (selectedControl === 'speed') {
-      setSpeed(tempControlValue)
-    } else if (selectedControl === 'volume') {
-      setVolume(tempControlValue)
     }
     // Go back to control selection menu instead of closing
     setSelectedControl(null)
@@ -348,19 +501,19 @@ export default function Playground() {
               <div className="nav-section-title">VOICE TOOLS</div>
               <button 
                 className={`nav-item ${activeView === 'text-to-speech' ? 'active' : ''}`}
-                onClick={() => setActiveView('text-to-speech')}
+                onClick={() => handleViewChange('text-to-speech')}
               >
                 Text to Speech
               </button>
               <button 
                 className={`nav-item ${activeView === 'instant-clone' ? 'active' : ''}`}
-                onClick={() => setActiveView('instant-clone')}
+                onClick={() => handleViewChange('instant-clone')}
               >
                 Instant Clone
               </button>
               <button 
                 className={`nav-item ${activeView === 'speech-to-text' ? 'active' : ''}`}
-                onClick={() => setActiveView('speech-to-text')}
+                onClick={() => handleViewChange('speech-to-text')}
               >
                 Speech to Text
               </button>
@@ -369,7 +522,12 @@ export default function Playground() {
 
             <div className="nav-section">
               <div className="nav-section-title">LIBRARY</div>
-              <button className="nav-item">Voices</button>
+              <button 
+                className={`nav-item ${activeView === 'voices' ? 'active' : ''}`}
+                onClick={() => handleViewChange('voices')}
+              >
+                Voices
+              </button>
               <button className="nav-item">Pronunciation</button>
             </div>
 
@@ -462,27 +620,15 @@ export default function Playground() {
                           </button>
                           <button 
                             className="control-card-item"
+                            onClick={() => handleControlSelect('language', ttsLanguage)}
+                          >
+                            Language
+                          </button>
+                          <button 
+                            className="control-card-item"
                             onClick={() => handleControlSelect('voice', selectedVoice)}
                           >
                             Voice
-                          </button>
-                          <button 
-                            className="control-card-item"
-                            onClick={() => handleControlSelect('language', transcriptLanguage)}
-                          >
-                            Transcript Language
-                          </button>
-                          <button 
-                            className="control-card-item"
-                            onClick={() => handleControlSelect('speed', speed)}
-                          >
-                            Speed
-                          </button>
-                          <button 
-                            className="control-card-item"
-                            onClick={() => handleControlSelect('volume', volume)}
-                          >
-                            Volume
                           </button>
                         </>
                       ) : (
@@ -495,7 +641,24 @@ export default function Playground() {
                                 value={tempControlValue}
                                 onChange={(e) => setTempControlValue(e.target.value)}
                               >
-                                <option>Sonic 3.0</option>
+                                <option>Panini 0.1</option>
+                              </select>
+                            </div>
+                          )}
+                          {selectedControl === 'language' && (
+                            <div className="control-group">
+                              <label className="control-label">Language</label>
+                              <select
+                                className="control-select"
+                                value={tempControlValue}
+                                onChange={(e) => setTempControlValue(e.target.value)}
+                              >
+                                <option value="en">English</option>
+                                <option value="hi">Hindi</option>
+                                <option value="kn">Kannada</option>
+                                <option value="te">Telugu</option>
+                                <option value="mr">Marathi</option>
+                                <option value="sa">Sanskrit</option>
                               </select>
                             </div>
                           )}
@@ -506,88 +669,18 @@ export default function Playground() {
                                 className="control-select"
                                 value={tempControlValue}
                                 onChange={(e) => setTempControlValue(e.target.value)}
+                                disabled={filteredVoices.length === 0}
                               >
-                                <option>Tessa</option>
-                                <option>John</option>
-                                <option>Emma</option>
+                                {filteredVoices.length > 0 ? (
+                                  filteredVoices.map((voice) => (
+                                    <option key={`${voice.language}-${voice.voice_name}`} value={voice.voice_name}>
+                                      {voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)}
+                                    </option>
+                                  ))
+                                ) : (
+                                  <option>No voices available</option>
+                                )}
                               </select>
-                            </div>
-                          )}
-                          {selectedControl === 'language' && (
-                            <div className="control-group">
-                              <label className="control-label">Transcript Language</label>
-                              <select
-                                className="control-select"
-                                value={tempControlValue}
-                                onChange={(e) => setTempControlValue(e.target.value)}
-                              >
-                                <option value="en">English</option>
-                                <option value="hi">Hindi</option>
-                                <option value="kn">Kannada</option>
-                                <option value="te">Telugu</option>
-                                <option value="ma">Marathi</option>
-                                <option value="sa">Sanskrit</option>
-                              </select>
-                            </div>
-                          )}
-                          {selectedControl === 'speed' && (
-                            <div className="control-group">
-                              <label className="control-label">
-                                Speed
-                                <span className="control-value">{tempControlValue}x</span>
-                              </label>
-                              <div className="horizontal-slider-wrapper">
-                                <div className="horizontal-slider-container">
-                                  <div className="slider-icon-left">
-                                    <IoMdSpeedometer />
-                                  </div>
-                                  <div className="horizontal-slider-track">
-                                    <div 
-                                      className="horizontal-slider-fill speed-fill"
-                                      style={{ width: `${Math.max(0, Math.min(100, ((tempControlValue - 0.5) / 1.5) * 100))}%` }}
-                                    ></div>
-                                  </div>
-                                  <input
-                                    type="range"
-                                    className="horizontal-slider"
-                                    min="0.5"
-                                    max="2"
-                                    step="0.1"
-                                    value={tempControlValue}
-                                    onChange={(e) => setTempControlValue(parseFloat(e.target.value))}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                          {selectedControl === 'volume' && (
-                            <div className="control-group">
-                              <label className="control-label">
-                                Volume
-                                <span className="control-value">{tempControlValue}x</span>
-                              </label>
-                              <div className="horizontal-slider-wrapper">
-                                <div className="horizontal-slider-container">
-                                  <div className="slider-icon-left">
-                                    {tempControlValue === 0 ? <HiSpeakerXMark /> : <HiSpeakerWave />}
-                                  </div>
-                                  <div className="horizontal-slider-track">
-                                    <div 
-                                      className="horizontal-slider-fill volume-fill"
-                                      style={{ width: `${Math.max(0, Math.min(100, (tempControlValue / 2) * 100))}%` }}
-                                    ></div>
-                                  </div>
-                                  <input
-                                    type="range"
-                                    className="horizontal-slider"
-                                    min="0"
-                                    max="2"
-                                    step="0.1"
-                                    value={tempControlValue}
-                                    onChange={(e) => setTempControlValue(parseFloat(e.target.value))}
-                                  />
-                                </div>
-                              </div>
                             </div>
                           )}
                           <button className="control-card-done" onClick={handleControlDone}>
@@ -618,7 +711,23 @@ export default function Playground() {
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
                 >
-                  <option>Sonic 3.0</option>
+                  <option>Panini 0.1</option>
+                </select>
+              </div>
+
+              <div className="control-group">
+                <label className="control-label">Language</label>
+                <select
+                  className="control-select"
+                  value={ttsLanguage}
+                  onChange={(e) => setTtsLanguage(e.target.value)}
+                >
+                  <option value="en">English</option>
+                  <option value="hi">Hindi</option>
+                  <option value="kn">Kannada</option>
+                  <option value="te">Telugu</option>
+                  <option value="mr">Marathi</option>
+                  <option value="sa">Sanskrit</option>
                 </select>
               </div>
 
@@ -628,85 +737,18 @@ export default function Playground() {
                   className="control-select"
                   value={selectedVoice}
                   onChange={(e) => setSelectedVoice(e.target.value)}
+                  disabled={filteredVoices.length === 0}
                 >
-                  <option>Tessa</option>
-                  <option>John</option>
-                  <option>Emma</option>
+                  {filteredVoices.length > 0 ? (
+                      filteredVoices.map((voice) => (
+                        <option key={`${voice.language}-${voice.voice_name}`} value={voice.voice_name}>
+                          {voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)}
+                        </option>
+                      ))
+                  ) : (
+                    <option>No voices available</option>
+                  )}
                 </select>
-              </div>
-
-              <div className="control-group">
-                <label className="control-label">Transcript Language</label>
-                <select
-                  className="control-select"
-                  value={transcriptLanguage}
-                  onChange={(e) => setTranscriptLanguage(e.target.value)}
-                >
-                  <option value="en">English</option>
-                  <option value="hi">Hindi</option>
-                  <option value="kn">Kannada</option>
-                  <option value="te">Telugu</option>
-                  <option value="ma">Marathi</option>
-                  <option value="sa">Sanskrit</option>
-                </select>
-              </div>
-
-              <div className="control-group">
-                <label className="control-label">
-                  Speed
-                  <span className="control-value">{speed}x</span>
-                </label>
-                <div className="horizontal-slider-wrapper">
-                  <div className="horizontal-slider-container">
-                    <div className="slider-icon-left">
-                      <IoMdSpeedometer />
-                    </div>
-                    <div className="horizontal-slider-track">
-                      <div 
-                        className="horizontal-slider-fill speed-fill"
-                        style={{ width: `${Math.max(0, Math.min(100, ((speed - 0.5) / 1.5) * 100))}%` }}
-                      ></div>
-                    </div>
-                    <input
-                      type="range"
-                      className="horizontal-slider"
-                      min="0.5"
-                      max="2"
-                      step="0.1"
-                      value={speed}
-                      onChange={(e) => setSpeed(parseFloat(e.target.value))}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="control-group">
-                <label className="control-label">
-                  Volume
-                  <span className="control-value">{volume}x</span>
-                </label>
-                <div className="horizontal-slider-wrapper">
-                  <div className="horizontal-slider-container">
-                    <div className="slider-icon-left">
-                      {volume === 0 ? <HiSpeakerXMark /> : <HiSpeakerWave />}
-                    </div>
-                    <div className="horizontal-slider-track">
-                      <div 
-                        className="horizontal-slider-fill volume-fill"
-                        style={{ width: `${Math.max(0, Math.min(100, (volume / 2) * 100))}%` }}
-                      ></div>
-                    </div>
-                    <input
-                      type="range"
-                      className="horizontal-slider"
-                      min="0"
-                      max="2"
-                      step="0.1"
-                      value={volume}
-                      onChange={(e) => setVolume(parseFloat(e.target.value))}
-                    />
-                  </div>
-                </div>
               </div>
             </div>
           )}
@@ -718,10 +760,115 @@ export default function Playground() {
           )}
         </aside>
           </>
+        ) : activeView === 'voices' ? (
+          <div className="voices-view-container">
+            <div className="voices-view-header">
+              <h1 className="voices-view-title">Available Voices</h1>
+              <p className="voices-view-subtitle">Explore our collection of voices across multiple languages</p>
+            </div>
+            <div className="voices-cards-grid">
+              {(() => {
+                // Use local voice data if API data is empty or unavailable
+                const voicesToDisplay = availableVoices.length > 0 
+                  ? availableVoices.filter(voice => voice.available)
+                  : getAllVoices().map(voice => ({
+                      language: voice.language,
+                      voice_name: voice.name, // Use the actual name field which now contains patrick, diana, etc.
+                      available: true,
+                      voiceId: voice.voiceId
+                    }))
+                
+                if (voicesToDisplay.length === 0) {
+                  return (
+                    <div className="voices-loading">
+                      <p>Loading voices...</p>
+                    </div>
+                  )
+                }
+                
+                const languageNames = {
+                  en: 'English',
+                  hi: 'Hindi',
+                  kn: 'Kannada',
+                  te: 'Telugu',
+                  mr: 'Marathi',
+                  sa: 'Sanskrit'
+                }
+                
+                return voicesToDisplay.map((voice) => {
+                  // Get full voice data from local metadata if available
+                  const localVoiceData = getAllVoices().find(v => 
+                    v.language === voice.language && 
+                    ((v.gender === 'female' && (voice.voice_name === 'diana' || voice.voice_name === 'pooja' || voice.voice_name === 'bhagya' || voice.voice_name === 'vidhya' || voice.voice_name === 'neha')) ||
+                     (v.gender === 'male' && (voice.voice_name === 'patrick' || voice.voice_name === 'surya' || voice.voice_name === 'arush' || voice.voice_name === 'ranna' || voice.voice_name === 'kabir' || voice.voice_name === 'raghava')))
+                  )
+                  
+                  const description = localVoiceData?.description || 
+                    `${voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)} voice for ${languageNames[voice.language] || voice.language.toUpperCase()}`
+                  
+                  const displayName = localVoiceData?.displayName || 
+                    `${voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)}`
+                  
+                  return (
+                    <div 
+                      key={`${voice.language}-${voice.voice_name}`}
+                      className="voice-detail-card"
+                      onClick={() => {
+                        const voiceId = voice.voiceId || `${voice.language}-${voice.voice_name}-001`
+                        navigate(`/voices/${voiceId}`)
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="voice-card-image-container">
+                        <img 
+                          src={localVoiceData?.image || `/${voice.language}-${voice.voice_name}.png`}
+                          alt={`${displayName} voice`}
+                          className="voice-card-image"
+                          onError={(e) => {
+                            e.target.src = '/umale.png' // Fallback image
+                          }}
+                        />
+                      </div>
+                      <div className="voice-card-content">
+                        <div className="voice-card-header">
+                          <h3 className="voice-card-name">
+                            {displayName}
+                          </h3>
+                          <span className="voice-card-badge available">Available</span>
+                        </div>
+                        <p className="voice-card-description">
+                          {description}
+                        </p>
+                        <div className="voice-card-footer">
+                          <span className="voice-card-language">{voice.language.toUpperCase()}</span>
+                          <span className="voice-card-gender">{voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })
+              })()}
+            </div>
+          </div>
         ) : activeView === 'speech-to-text' ? (
           <div className="speech-to-text-container">
             <div className="speech-to-text-header">
               <h1 className="speech-to-text-title">Speech to Text</h1>
+              <div className="speech-to-text-language-selector">
+                <label className="speech-to-text-language-label">Language:</label>
+                <select
+                  className="speech-to-text-language-select"
+                  value={asrLanguage}
+                  onChange={(e) => setAsrLanguage(e.target.value)}
+                >
+                  <option value="en">English</option>
+                  <option value="hi">Hindi</option>
+                  <option value="kn">Kannada</option>
+                  <option value="te">Telugu</option>
+                  <option value="mr">Marathi</option>
+                  <option value="sa">Sanskrit</option>
+                </select>
+              </div>
             </div>
 
             {/* Three Card Layout */}
@@ -860,7 +1007,8 @@ export default function Playground() {
                         try {
                           const formData = new FormData()
                           formData.append('audio', recordedBlob)
-                          const response = await fetch(`${API_BASE}/asr`, {
+                          formData.append('language', asrLanguage)
+                          const response = await fetch(`${API_BASE}/api/v1/asr`, {
                             method: 'POST',
                             body: formData
                           })
@@ -929,20 +1077,56 @@ export default function Playground() {
                 <h1 className="instant-clone-title">Instant Clone</h1>
               </div>
               <button 
-                className={`clone-btn ${!cloneName || !cloneLanguage || !recordedUrl ? 'disabled' : ''}`}
-                onClick={() => {
-                  if (!cloneName || !cloneLanguage || !recordedUrl) return
-                  // Generate a unique ID for the voice
-                  const voiceId = '47a3e1f3-3988-4578-adc0-1b9f96b42c16' // In real app, this would come from API
-                  navigate(`/voices/${voiceId}`, {
-                    state: {
-                      voiceName: cloneName || 'google',
-                      language: cloneLanguage || 'en',
-                      description: cloneDescription
+                className={`clone-btn ${!cloneName || !cloneLanguage || !recordedBlob ? 'disabled' : ''}`}
+                onClick={async () => {
+                  if (!cloneName || !cloneLanguage || !recordedBlob) return
+                  
+                  setIsSending(true)
+                  try {
+                    // Convert recorded audio to base64
+                    const audioBase64 = await blobToBase64(recordedBlob)
+                    
+                    // Send TTS request with cloning parameters
+                    const requestBody = {
+                      text: "Hello, this is a test of the cloned voice.",
+                      voice: cloneLanguage === 'en' ? 'patrick' : cloneLanguage === 'hi' ? 'surya' : 'voice1',
+                      cloneing: true,
+                      ref_speker_base64: audioBase64,
+                      ref_speker_name: cloneName
                     }
-                  })
+                    
+                    const response = await fetch(`${API_BASE}/api/v1/tts`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(requestBody)
+                    })
+                    
+                    if (!response.ok) {
+                      const errorData = await response.json().catch(() => null)
+                      throw new Error(errorData?.detail || 'Failed to clone voice')
+                    }
+                    
+                    const blob = await response.blob()
+                    if (blob.size === 0) {
+                      throw new Error('Received empty audio file from server')
+                    }
+                    
+                    const url = URL.createObjectURL(blob)
+                    setAudioUrl(url)
+                    const audio = new Audio(url)
+                    audio.play().catch(() => {
+                      // Autoplay blocked, user can play manually
+                    })
+                    
+                    alert(`Voice "${cloneName}" cloned successfully! You can now use it for TTS.`)
+                  } catch (err) {
+                    console.error('Clone error:', err)
+                    alert(`Error cloning voice: ${err.message}`)
+                  } finally {
+                    setIsSending(false)
+                  }
                 }}
-                disabled={!cloneName || !cloneLanguage || !recordedUrl}
+                disabled={!cloneName || !cloneLanguage || !recordedBlob || isSending}
               >
                 <FaUser />
                 Clone
@@ -1171,7 +1355,7 @@ export default function Playground() {
                     <option value="hi">Hindi</option>
                     <option value="kn">Kannada</option>
                     <option value="te">Telugu</option>
-                    <option value="ma">Marathi</option>
+                    <option value="mr">Marathi</option>
                     <option value="sa">Sanskrit</option>
                   </select>
                 </div>
