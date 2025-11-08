@@ -846,7 +846,7 @@ export default function Playground() {
                   // Get full voice data from local metadata if available
                   const localVoiceData = getAllVoices().find(v => 
                     v.language === voice.language && 
-                    ((v.gender === 'female' && (voice.voice_name === 'diana' || voice.voice_name === 'pooja' || voice.voice_name === 'bhagya' || voice.voice_name === 'vidhya' || voice.voice_name === 'neha')) ||
+                    ((v.gender === 'female' && (voice.voice_name === 'diana' || voice.voice_name === 'pooja' || voice.voice_name === 'bhagya' || voice.voice_name === 'vidhya' || voice.voice_name === 'neha' || voice.voice_name === 'janki')) || 
                      (v.gender === 'male' && (voice.voice_name === 'patrick' || voice.voice_name === 'surya' || voice.voice_name === 'arush' || voice.voice_name === 'ranna' || voice.voice_name === 'kabir' || voice.voice_name === 'raghava')))
                   )
                   

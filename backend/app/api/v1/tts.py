@@ -31,6 +31,7 @@ async def text_to_speech(request: Request, tts_request: TTSRequest):
         audio_content = await tts_service.synthesize(
             text=tts_request.text,
             voice=tts_request.voice,
+            language=tts_request.language,
             cloneing=tts_request.cloneing or False,
             ref_speker_base64=tts_request.ref_speker_base64,
             ref_speker_name=tts_request.ref_speker_name

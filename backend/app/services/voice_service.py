@@ -31,8 +31,8 @@ class VoiceService:
             {"language": "kn", "voice_name": "vidhya", "available": True},
             {"language": "te", "voice_name": "arush", "available": True},
             {"language": "te", "voice_name": "bhagya", "available": True},
-            {"language": "ma", "voice_name": "kabir", "available": True},
-            {"language": "ma", "voice_name": "neha", "available": True},
+            {"language": "mr", "voice_name": "kabir", "available": True},
+            {"language": "mr", "voice_name": "neha", "available": True},
             {"language": "sa", "voice_name": "raghava", "available": True},
             {"language": "sa", "voice_name": "janki", "available": True},
         ]

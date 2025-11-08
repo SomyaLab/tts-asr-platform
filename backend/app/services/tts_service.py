@@ -32,6 +32,7 @@ class TTSService:
         self,
         text: str,
         voice: str,
+        language: Optional[str] = None,
         cloneing: bool = False,
         ref_speker_base64: Optional[str] = None,
         ref_speker_name: Optional[str] = None
@@ -54,6 +55,7 @@ class TTSService:
             payload = {
                 "endpoint": "tts",
                 "text": text,
+                "language": language,
                 "voice": voice,
                 "return_base64": True
             }
