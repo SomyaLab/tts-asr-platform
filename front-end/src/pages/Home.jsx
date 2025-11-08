@@ -31,9 +31,9 @@ export default function Home() {
     en: { female: '/en-female.mp3', male: '/en-male.mp3' },
     hi: { female: '/hi-female.mp3', male: '/hi-male.mp3' },
     kn: { female: '/kn-female.mp3', male: '/kn-male.mp3' },
-    mr: { female: '/kn-female.mp3', male: '/kn-male.mp3' }, // Using Kannada files as placeholder
-    te: { female: '/kn-female.mp3', male: '/kn-male.mp3' }, // Using Kannada files as placeholder
-    sa: { female: '/kn-female.mp3', male: '/kn-male.mp3' }, // Using Kannada files as placeholder
+    mr: { female: '/mr-female.mp3', male: '/mr-male.mp3' }, // Using Kannada files as placeholder
+    te: { female: '/te-female.mp3', male: '/te-male.mp3' }, // Using Kannada files as placeholder
+    sa: { female: '/sa-female.mp3', male: '/sa-male.mp3' }, // Using Kannada files as placeholder
   }
 
   // ASR demo audio files (using male voices for demo)
@@ -41,9 +41,9 @@ export default function Home() {
     en: '/en-male.mp3',
     hi: '/hi-male.mp3',
     kn: '/kn-male.mp3',
-    mr: '/kn-male.mp3', // Using Kannada files as placeholder
-    te: '/kn-male.mp3', // Using Kannada files as placeholder
-    sa: '/kn-male.mp3', // Using Kannada files as placeholder
+    mr: '/mr-male.mp3', // Using Kannada files as placeholder
+    te: '/te-male.mp3', // Using Kannada files as placeholder
+    sa: '/sa-male.mp3', // Using Kannada files as placeholder
   }
 
 
@@ -51,10 +51,10 @@ export default function Home() {
   const DEMO_TEXTS = {
     en: 'We warmly welcome you to Somya Lab, a home for celebrating and preserving the world\'s many voices',
     kn: 'ಸೋಮ್ಯಾ ಲ್ಯಾಬ್‌ಗೆ ನಿಮಗೆ ಹೃತ್ಪೂರ್ವಕ ಸ್ವಾಗತ, ಇದು ವಿಶ್ವದ ಅನೇಕ ಧ್ವನಿಗಳನ್ನು ಆಚರಿಸುವ ಮತ್ತು ಸಂರಕ್ಷಿಸುವ ಮನೆಯಾಗಿದೆ.',
-    hi: 'सोम्या लैब में आपका हार्दिक स्वागत है, जो दुनिया की अनेकों आवाज़ों का उत्सव मनाने और उन्हें संरक्षित करने का एक घर है।',
-    te: 'సోమ్యా ల్యాబ్‌కు మీకు హృదయపూర్వక స్వాగతం, ఇది ప్రపంచంలోని అనేక స్వరాలను జరుపుకునే మరియు సంరక్షించే నిలయం.',
-    mr: 'सोम्या लॅबमध्ये आपले हार्दिक स्वागत आहे, जे जगातील अनेक आवाजांचा उत्सव साजरा करणारे आणि त्यांना जतन करणारे घर आहे।',
-    sa: 'सोम्या-प्रयोगशालायां भवतः सस्नेहं स्वागतम्। एतत् विश्वस्य विविधानां स्वराणां संरक्षणाय उत्सवाय च एकं गृहम् अस्ति।'
+    hi: 'हम आपका हार्दिक स्वागत करते हैं सोम्या लैब में एक ऐसा स्थल जहाँ हम दुनिया की अनेक आवाज़ों का उत्सव मनाते और उन्हें संजोकर रखते हैं।',
+    te: 'మేము మిమ్మల్ని హృదయపూర్వకంగా స్వాగతిస్తున్నాము సోమ్యా ల్యాబ్‌కి ఇది ప్రపంచంలోని అనేక స్వరాలను జరుపుకునే మరియు సంరక్షించే గృహం.',
+    mr: 'आम्ही तुमचं हार्दिक स्वागत करतो सोम्या लॅबमध्ये जगातील अनेक आवाज साजरे आणि जपले जाणारे एक घर।',
+    sa: 'वयं सोम्या प्रयोगशालायां हृदयपूर्वकं स्वागतं कुर्मः यत्र जगतः नानावाणीः उत्सवयामः च रक्षामः च।'
   }
 
   useEffect(() => {
