@@ -25,7 +25,7 @@ async def text_to_speech(request: Request, tts_request: TTSRequest):
         Audio file (WAV format)
     """
     try:
-        logger.info(f"Received TTS request: text='{tts_request.text[:50]}...', voice={tts_request.voice}, cloneing={tts_request.cloneing}")
+        logger.info(f"Received TTS request: text='{tts_request.text[:50]}...', voice={tts_request.voice}, language={tts_request.language}, cloneing={tts_request.cloneing}")
         
         # Synthesize speech
         audio_content = await tts_service.synthesize(

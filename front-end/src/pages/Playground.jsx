@@ -61,6 +61,11 @@ export default function Playground() {
   const animationFrameRef = useRef(null)
   const startTimeRef = useRef(null)
   const fileInputRef = useRef(null)
+  const [showClonePreview, setShowClonePreview] = useState(false)
+  const [clonePreviewText, setClonePreviewText] = useState("It's nice to meet you. Hope you're having a great day.")
+  const [clonePreviewLanguage, setClonePreviewLanguage] = useState('en')
+  const [clonePreviewAudio, setClonePreviewAudio] = useState(null)
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
   // Fix API base URL - remove trailing /api if present to avoid double /api/api
   // Note: 0.0.0.0 is not accessible from browsers, use localhost or actual hostname
   const rawApiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'
@@ -202,7 +207,8 @@ export default function Playground() {
     try {
       const requestBody = { 
         text: textToSpeak.trim(),
-        voice: selectedVoice
+        voice: selectedVoice,
+        language: ttsLanguage
       }
       console.log('Sending TTS request to:', `${API_BASE}/api/v1/tts`, requestBody)
       
@@ -272,6 +278,94 @@ export default function Playground() {
       alert(`Error: ${errorMessage}`)
     } finally {
       setIsSending(false)
+    }
+  }
+
+  const handleClonePreview = async () => {
+    if (isGeneratingPreview || !clonePreviewText.trim()) return
+    setIsGeneratingPreview(true)
+    
+    try {
+      const audioBase64 = await blobToBase64(recordedBlob)
+      
+      const requestBody = {
+        text: clonePreviewText.trim(),
+        voice: cloneName,
+        language: clonePreviewLanguage,
+        cloneing: true,
+        ref_speker_base64: audioBase64,
+        ref_speker_name: cloneName
+      }
+      
+      const response = await fetch(`${API_BASE}/api/v1/tts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        throw new Error(errorData?.detail || 'Failed to generate preview')
+      }
+      
+      const blob = await response.blob()
+      if (blob.size === 0) {
+        throw new Error('Received empty audio file from server')
+      }
+      
+      const url = URL.createObjectURL(blob)
+      setClonePreviewAudio(url)
+      
+      // Auto-play preview
+      const audio = new Audio(url)
+      audio.play().catch(() => {})
+      
+    } catch (err) {
+      console.error('Preview error:', err)
+      alert(`Error generating preview: ${err.message}`)
+    } finally {
+      setIsGeneratingPreview(false)
+    }
+  }
+
+  const handleDownloadClonePackage = async () => {
+    if (!recordedBlob && !clonePreviewAudio) {
+      alert('No audio available to download')
+      return
+    }
+    
+    try {
+      // Download reference audio
+      if (recordedBlob) {
+        const url = URL.createObjectURL(recordedBlob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${cloneName}_reference.webm`
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        URL.revokeObjectURL(url)
+      }
+      
+      // Download preview audio if available (with slight delay to avoid browser blocking)
+      if (clonePreviewAudio) {
+        setTimeout(async () => {
+          const response = await fetch(clonePreviewAudio)
+          const blob = await response.blob()
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `${cloneName}_preview.wav`
+          document.body.appendChild(a)
+          a.click()
+          a.remove()
+          URL.revokeObjectURL(url)
+        }, 100)
+      }
+      
+    } catch (err) {
+      console.error('Download error:', err)
+      alert('Failed to download audio files')
     }
   }
 
@@ -1124,56 +1218,17 @@ export default function Playground() {
                 <h1 className="instant-clone-title">Instant Clone</h1>
               </div>
               <button 
-                className={`clone-btn ${!cloneName || !cloneLanguage || !recordedBlob ? 'disabled' : ''}`}
-                onClick={async () => {
-                  if (!cloneName || !cloneLanguage || !recordedBlob) return
+                className={`clone-btn ${!cloneName || !recordedBlob ? 'disabled' : ''}`}
+                onClick={() => {
+                  if (!cloneName || !recordedBlob) return
                   
-                  setIsSending(true)
-                  try {
-                    // Convert recorded audio to base64
-                    const audioBase64 = await blobToBase64(recordedBlob)
-                    
-                    // Send TTS request with cloning parameters
-                    const requestBody = {
-                      text: "Hello, this is a test of the cloned voice.",
-                      voice: cloneLanguage === 'en' ? 'patrick' : cloneLanguage === 'hi' ? 'surya' : 'voice1',
-                      cloneing: true,
-                      ref_speker_base64: audioBase64,
-                      ref_speker_name: cloneName
-                    }
-                    
-                    const response = await fetch(`${API_BASE}/api/v1/tts`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(requestBody)
-                    })
-                    
-                    if (!response.ok) {
-                      const errorData = await response.json().catch(() => null)
-                      throw new Error(errorData?.detail || 'Failed to clone voice')
-                    }
-                    
-                    const blob = await response.blob()
-                    if (blob.size === 0) {
-                      throw new Error('Received empty audio file from server')
-                    }
-                    
-                    const url = URL.createObjectURL(blob)
-                    setAudioUrl(url)
-                    const audio = new Audio(url)
-                    audio.play().catch(() => {
-                      // Autoplay blocked, user can play manually
-                    })
-                    
-                    alert(`Voice "${cloneName}" cloned successfully! You can now use it for TTS.`)
-                  } catch (err) {
-                    console.error('Clone error:', err)
-                    alert(`Error cloning voice: ${err.message}`)
-                  } finally {
-                    setIsSending(false)
-                  }
+                  // Store clone data for later use
+                  setShowClonePreview(true)
+                  // Default to English for preview
+                  setClonePreviewLanguage('en')
+                  setClonePreviewText("It's nice to meet you. Hope you're having a great day.")
                 }}
-                disabled={!cloneName || !cloneLanguage || !recordedBlob || isSending}
+                disabled={!cloneName || !recordedBlob}
               >
                 <FaUser />
                 Clone
@@ -1387,29 +1442,77 @@ export default function Playground() {
                     rows={4}
                   />
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-                <div className="clone-form-group">
-                  <label className="clone-form-label">
-                    Language<span className="required">*</span>
-                  </label>
-                  <select
-                    className="clone-form-select"
-                    value={cloneLanguage}
-                    onChange={(e) => setCloneLanguage(e.target.value)}
-                  >
-                    <option value="">Select language</option>
-                    <option value="en">English</option>
-                    <option value="hi">Hindi</option>
-                    <option value="kn">Kannada</option>
-                    <option value="te">Telugu</option>
-                    <option value="mr">Marathi</option>
-                    <option value="sa">Sanskrit</option>
-                  </select>
+        {/* Clone Preview Modal */}
+        {showClonePreview && (
+          <div className="clone-preview-overlay" onClick={() => setShowClonePreview(false)}>
+            <div className="clone-preview-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="clone-preview-header">
+                <div className="clone-preview-breadcrumb">
+                  <span>My Voices</span>
+                  <span className="breadcrumb-separator">›</span>
+                  <span>{cloneName}</span>
                 </div>
-
-                <p className="language-note">
-                  Note that the language of the speech used for cloning must match the language used for generation.
-                </p>
+                <button 
+                  className="clone-preview-edit-btn"
+                  onClick={() => setShowClonePreview(false)}
+                >
+                  Edit
+                </button>
+              </div>
+              
+              <h2 className="clone-preview-title">{cloneName}</h2>
+              
+              <div className="clone-preview-section">
+                <h3 className="clone-preview-section-title">Preview</h3>
+                <div className="clone-preview-controls">
+                  <div className="clone-preview-language">
+                    <label className="clone-preview-label">Language</label>
+                    <select
+                      className="clone-preview-select"
+                      value={clonePreviewLanguage}
+                      onChange={(e) => setClonePreviewLanguage(e.target.value)}
+                    >
+                      <option value="en">English</option>
+                      <option value="hi">Hindi</option>
+                      <option value="kn">Kannada</option>
+                      <option value="te">Telugu</option>
+                      <option value="mr">Marathi</option>
+                      <option value="sa">Sanskrit</option>
+                    </select>
+                  </div>
+                  
+                  <textarea
+                    className="clone-preview-text"
+                    value={clonePreviewText}
+                    onChange={(e) => setClonePreviewText(e.target.value)}
+                    placeholder="Enter text to preview..."
+                    rows={3}
+                  />
+                  
+                  <button
+                    className="clone-preview-speak-btn"
+                    onClick={handleClonePreview}
+                    disabled={isGeneratingPreview || !clonePreviewText.trim()}
+                  >
+                    <FaPlay />
+                    {isGeneratingPreview ? 'Generating...' : 'Speak'}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="clone-preview-actions">
+                <button 
+                  className="clone-preview-action-btn"
+                  onClick={handleDownloadClonePackage}
+                >
+                  <LiaDownloadSolid />
+                  Download Source
+                </button>
               </div>
             </div>
           </div>
