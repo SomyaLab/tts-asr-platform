@@ -10,6 +10,7 @@ import { IoClose } from 'react-icons/io5'
 import { IoSunny } from 'react-icons/io5'
 import { FaMoon, FaCloudUploadAlt } from 'react-icons/fa'
 import { BsThreeDotsVertical } from 'react-icons/bs'
+import { LiaDownloadSolid } from 'react-icons/lia'
 import AudioPlayer from '../components/AudioPlayer.jsx'
 import { getAllVoices } from '../data/voiceData.js'
 
@@ -29,6 +30,8 @@ export default function Playground() {
   const [activeTab, setActiveTab] = useState('controls')
   const [isSending, setIsSending] = useState(false)
   const [audioUrl, setAudioUrl] = useState(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const audioRef = useRef(null)
   const [theme, setTheme] = useState('light')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [showControlCard, setShowControlCard] = useState(false)
@@ -247,19 +250,13 @@ export default function Playground() {
       
       const url = URL.createObjectURL(blob)
       setAudioUrl(url)
-      const audio = new Audio(url)
-      audio.play().catch((playError) => {
-        console.warn('Autoplay blocked, triggering download:', playError)
-        // Fall back to triggering a download if autoplay is blocked
-        const a = document.createElement('a')
-        a.href = url
-        a.download = 'tts.wav'
-        document.body.appendChild(a)
-        a.click()
-        a.remove()
-      })
-      audio.onended = () => URL.revokeObjectURL(url)
-      console.log('TTS audio playback started')
+      setIsPlaying(false)
+      // Reset audio ref when new audio is generated
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+      console.log('TTS audio generated successfully')
     } catch (err) {
       console.error('TTS error:', err)
       let errorMessage = 'Failed to generate speech. Please try again.'
@@ -286,6 +283,38 @@ export default function Playground() {
       document.body.appendChild(a)
       a.click()
       a.remove()
+    }
+  }
+
+  const handlePlayPause = () => {
+    if (!audioUrl) return
+
+    // Create audio element if it doesn't exist
+    if (!audioRef.current) {
+      const audio = new Audio(audioUrl)
+      audioRef.current = audio
+
+      // Set up event listeners
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false)
+      })
+      audio.addEventListener('pause', () => {
+        setIsPlaying(false)
+      })
+      audio.addEventListener('play', () => {
+        setIsPlaying(true)
+      })
+    }
+
+    const audio = audioRef.current
+
+    if (isPlaying) {
+      audio.pause()
+    } else {
+      audio.play().catch((error) => {
+        console.error('Error playing audio:', error)
+        setIsPlaying(false)
+      })
     }
   }
 
@@ -428,6 +457,19 @@ export default function Playground() {
       }
     }
   }, [recordedUrl])
+
+  // Cleanup audio element when audioUrl changes or component unmounts
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl)
+      }
+    }
+  }, [audioUrl])
 
 
   if (!user) {
@@ -576,6 +618,24 @@ export default function Playground() {
                   <div className="credits-info">0 credits</div>
                   <div className="word-count-info">{countWords(textToSpeak)} {countWords(textToSpeak) === 1 ? 'word' : 'words'}</div>
                 </div>
+                {audioUrl && (
+                  <div className="audio-controls">
+                    <button 
+                      className="play-pause-btn" 
+                      onClick={handlePlayPause}
+                      title={isPlaying ? 'Pause' : 'Play'}
+                    >
+                      {isPlaying ? <FaPause /> : <FaPlay />}
+                    </button>
+                    <button 
+                      className="download-btn" 
+                      onClick={handleDownload}
+                      title="Download audio"
+                    >
+                      <LiaDownloadSolid />
+                    </button>
+                  </div>
+                )}
                 <div className="speak-btn-container">
                 <button
                     className="speak-btn"
@@ -586,19 +646,6 @@ export default function Playground() {
                     Speak
                   </button>
                   </div>
-                {audioUrl && (
-                  <div className="audio-actions">
-                    <button className="play-btn-small" onClick={() => {
-                      const audio = new Audio(audioUrl)
-                      audio.play()
-                    }}>
-                      <FaPlay />
-                    </button>
-                    <button className="download-link" onClick={handleDownload}>
-                      Download
-                    </button>
-                  </div>
-                )}
               </div>
 
               {/* Control Card */}
