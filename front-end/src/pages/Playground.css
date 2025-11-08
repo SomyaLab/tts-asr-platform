@@ -2569,6 +2569,17 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Dark theme override for select dropdown options */
+:root[data-theme="dark"] .speech-to-text-language-select {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .speech-to-text-language-select option {
+  background: #ffffff;
+  color: #000000;
+}
+
 .speech-to-text-layout {
   display: flex;
   flex-direction: column;
