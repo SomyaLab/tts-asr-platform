@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     NOISE_SUPPRESSION_ENABLED: bool = True
     
     # CORS Configuration (comma-separated string, will be split)
-    CORS_ORIGINS_STR: str = "http://localhost:5173,http://localhost:3000,http://localhost:8000"
+    CORS_ORIGINS_STR: str = "http://localhost:5173,http://localhost:3000,http://localhost:8000,https://somya.ai,https://www.somya.ai,http://somya.ai,http://www.somya.ai"
     
     # Server Configuration
     HOST: str = "0.0.0.0"

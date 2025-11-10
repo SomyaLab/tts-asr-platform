@@ -68,8 +68,19 @@ export default function Playground() {
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
   // Fix API base URL - remove trailing /api if present to avoid double /api/api
   // Note: 0.0.0.0 is not accessible from browsers, use localhost or actual hostname
-  const rawApiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'
-  const API_BASE = rawApiBase.replace(/\/api\/?$/, '')
+  // When accessed through a domain (like somya.ai), use relative path
+  const getApiBase = () => {
+    if (import.meta.env.VITE_API_BASE_URL) {
+      return import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '')
+    }
+    // If accessed via domain (not localhost), use same domain
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return window.location.origin
+    }
+    // Default to localhost for local development
+    return 'http://localhost:8082'
+  }
+  const API_BASE = getApiBase()
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light'

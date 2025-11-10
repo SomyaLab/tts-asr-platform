@@ -7,9 +7,20 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',  // Listen on all network interfaces
     port: 5173,
+    allowedHosts: [
+      'localhost',
+      'somya.ai',
+      'www.somya.ai',
+      '.somya.ai',  // Allow all subdomains
+    ],
     hmr: {
-      host: 'localhost',  // Explicitly set HMR WebSocket host
-      clientPort: 5173,  // Port for HMR WebSocket
+      // Disable HMR over websocket when accessed via domain
+      // This prevents wss://localhost:5173 connection errors
+      protocol: 'ws',
+      host: 'localhost',
+      clientPort: 5173,
     },
+    // Disable HMR when accessed through Cloudflare Tunnel
+    strictPort: false,
   },
 })

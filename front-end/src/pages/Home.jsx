@@ -29,21 +29,21 @@ export default function Home() {
   // Map languages/voices to files in public/ (update with your real filenames)
   const AUDIO_FILES = {
     en: { female: '/en-female.mp3', male: '/en-male.mp3' },
-    hi: { female: '/hi-female.mp3', male: '/hi-male.mp3' },
+    hi: { female: '/hi-female.wav', male: '/hi-male.wav' },
     kn: { female: '/kn-female.mp3', male: '/kn-male.mp3' },
-    mr: { female: '/mr-female.mp3', male: '/mr-male.mp3' }, // Using Kannada files as placeholder
-    te: { female: '/te-female.mp3', male: '/te-male.mp3' }, // Using Kannada files as placeholder
-    sa: { female: '/sa-female.mp3', male: '/sa-male.mp3' }, // Using Kannada files as placeholder
+    mr: { female: '/mr-female.wav', male: '/mr-male.wav' }, 
+    te: { female: '/te-female.wav', male: '/te-male.wav' }, 
+    sa: { female: '/sa-female.wav', male: '/sa-male.wav' }, 
   }
 
   // ASR demo audio files (using male voices for demo)
   const ASR_AUDIO_FILES = {
     en: '/en-male.mp3',
-    hi: '/hi-male.mp3',
+    hi: '/hi-male.wav', 
     kn: '/kn-male.mp3',
-    mr: '/mr-male.mp3', // Using Kannada files as placeholder
-    te: '/te-male.mp3', // Using Kannada files as placeholder
-    sa: '/sa-male.mp3', // Using Kannada files as placeholder
+    mr: '/mr-male.wav', 
+    te: '/te-male.wav', 
+    sa: '/sa-male.wav', 
   }
 
 
@@ -112,12 +112,12 @@ export default function Home() {
               <div style={{ display: 'flex', gap: 24, alignItems: 'center', margin: '24px 24px 24px 24px'}}>
                 <span style={{ opacity: 0.85 }}>Language:</span>
                 <select className="tts-select" value={ttsLanguage} onChange={(e) => setTtsLanguage(e.target.value)}>
-                  <option value="en">English</option>
+                  <option value="sa">Sanskrit</option> 
                   <option value="hi">Hindi</option>
                   <option value="kn">Kannada</option>
                   <option value="mr">Marathi</option>
                   <option value="te">Telugu</option>
-                  <option value="sa">Sanskrit</option>
+                  <option value="en">English</option>
                 </select>
                 <span style={{ opacity: 0.85}} >Voice:</span>
                 <select className="tts-select" value={ttsVoice} onChange={(e) => setTtsVoice(e.target.value)}>
