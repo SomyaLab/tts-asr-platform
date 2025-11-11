@@ -13,9 +13,10 @@ import { BsThreeDotsVertical } from 'react-icons/bs'
 import { LiaDownloadSolid } from 'react-icons/lia'
 import AudioPlayer from '../components/AudioPlayer.jsx'
 import { getAllVoices } from '../data/voiceData.js'
+import AccountModal from '../components/AccountModal.jsx'
 
 export default function Playground() {
-  const { user, signInWithGoogle, signInWithApple } = useAuth()
+  const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [textToSpeak, setTextToSpeak] = useState('')
@@ -56,6 +57,7 @@ export default function Playground() {
   const [recordedUrl, setRecordedUrl] = useState(null)
   const [recordingDuration, setRecordingDuration] = useState(0)
   const [useEntireClip, setUseEntireClip] = useState(true)
+  const [showAccountModal, setShowAccountModal] = useState(false)
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
   const animationFrameRef = useRef(null)
@@ -479,10 +481,6 @@ export default function Playground() {
           <div className="login-card">
             <h2 className="login-title">Welcome to Playground</h2>
             <p className="login-sub">Sign in to continue</p>
-            <div className="login-actions">
-              <button className="btn btn-primary" onClick={signInWithGoogle}>Continue with Google</button>
-              <button className="btn" onClick={signInWithApple}>Continue with Apple</button>
-            </div>
           </div>
         </div>
       </div>
@@ -519,9 +517,6 @@ export default function Playground() {
                 </div>
               </button>
             </div>
-            <button className="navbar-btn user-btn" title="User">
-              <img src="/male.png" alt="User" className="user-avatar" />
-            </button>
           </div>
         </nav>
       </div>
@@ -582,6 +577,20 @@ export default function Playground() {
               <button className="nav-item">API Keys</button>
             </div>
           </nav>
+
+          {user && (
+            <div className="sidebar-user-section">
+              <div className="nav-section">
+                <div className="nav-section-title">USER INFO</div>
+                <button 
+                  className="nav-item sidebar-user-name"
+                  onClick={() => setShowAccountModal(true)}
+                >
+                  {user.name || user.email}
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="sidebar-footer">
             <p>© 2025 Somya AI. All rights reserved.</p>
@@ -1415,6 +1424,12 @@ export default function Playground() {
           </div>
         )}
       </div>
+
+      {/* Account Modal */}
+      <AccountModal 
+        isOpen={showAccountModal} 
+        onClose={() => setShowAccountModal(false)} 
+      />
     </div>
   )
 }

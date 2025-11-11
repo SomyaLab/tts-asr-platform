@@ -261,7 +261,7 @@ export default function Home() {
       <div className="footer-cta">
         <div className="footer-cta-inner">
           <h2>Get started with Somya Labs</h2>
-          <button className="footer-cta-btn" type="button">Open Playground</button>
+          <a className="footer-cta-btn" type="button" href="/playground">Open Playground</a>
         </div>
       </div>
 

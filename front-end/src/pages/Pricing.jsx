@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { HiMiniHome } from 'react-icons/hi2'
 import './Pricing.css'
 
 const PLANS = [
@@ -33,8 +34,9 @@ export default function Pricing() {
   return (
     <div className="pricing">
       <div className="pricing-top">
-        <Link to="/" className="pg-back">←</Link>
-        <span>Home</span>
+        <Link to="/" className="navbar-btn home-btn" title="Home">
+          <HiMiniHome />
+        </Link>
       </div>
       <h2 className="pricing-title">Credit Plans</h2>
       <div className="plans-grid">

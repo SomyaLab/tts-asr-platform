@@ -10,6 +10,7 @@ import Pricing from './pages/Pricing.jsx'
 import AboutUs from './pages/AboutUs.jsx'
 import Contact from './pages/Contact.jsx'
 import VoiceDetail from './pages/VoiceDetail.jsx'
+import UserProfile from './pages/UserProfile.jsx'
 
 function App() {
   const location = useLocation()
@@ -34,6 +35,7 @@ function App() {
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/voices/:voiceId" element={<VoiceDetail />} />
+        <Route path="/profile" element={<UserProfile />} />
       </Routes>
     </>
   )

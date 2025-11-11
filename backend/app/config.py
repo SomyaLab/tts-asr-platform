@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     
     # Server Configuration
     HOST: str = "0.0.0.0"
-    PORT: int = 8000
+    PORT: int = 8082
     
     # Rate Limiting
     RATE_LIMIT_ENABLED: bool = True
@@ -37,6 +37,16 @@ class Settings(BaseSettings):
     # Supported Languages
     SUPPORTED_LANGUAGES: List[str] = ["en", "hi", "kn", "te", "ma", "sa"]
     SUPPORTED_GENDERS: List[str] = ["male", "female"]
+    
+    # Email Configuration
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = ""
+    SMTP_USE_TLS: bool = True
+    CONTACT_EMAIL_RECIPIENT: str = "rajath@somya.ai"
+    CONTACT_EMAIL_SUBJECT: str = "New Contact Form Submission - Somya Labs"
     
     model_config = SettingsConfigDict(
         env_file=".env",
