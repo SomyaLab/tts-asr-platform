@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './NavBar.css'
 import AuthModal from './AuthModal.jsx'
+import { useAuth } from '../AuthContext.jsx'
 import { IoMenu } from 'react-icons/io5'
 
 export default function NavBar() {
+  const { user } = useAuth()
   const [scrolled, setScrolled] = useState(false)
   const [onLight, setOnLight] = useState(false)
 
@@ -79,7 +81,9 @@ export default function NavBar() {
             <Link to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link>
           </nav>
           <div className="nav-actions">
-            <button className="link-btn" onClick={() => { setMenuOpen(false); setAuthOpen(true) }}>Login</button>
+            {!user && (
+              <button className="link-btn" onClick={() => { setMenuOpen(false); setAuthOpen(true) }}>Login</button>
+            )}
             <Link to="/playground" className="primary-cta" onClick={() => setMenuOpen(false)}>Playground</Link>
           </div>
 
@@ -92,7 +96,9 @@ export default function NavBar() {
               <Link to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link>
             </nav>
             <div className="nav-actions">
-              <button className="link-btn" onClick={() => { setMenuOpen(false); setAuthOpen(true) }}>Login</button>
+              {!user && (
+                <button className="link-btn" onClick={() => { setMenuOpen(false); setAuthOpen(true) }}>Login</button>
+              )}
               <Link to="/playground" className="primary-cta" onClick={() => setMenuOpen(false)}>Playground</Link>
             </div>
           </div>

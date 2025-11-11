@@ -132,12 +132,22 @@
   text-decoration: none;
 }
 
+:root[data-theme="light"] .playground .navbar-btn {
+  color: #111827;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
 .navbar-btn:hover {
   background: rgba(0, 0, 0, 0.05);
   transform: scale(1.05);
 }
 
-:root[data-theme="dark"] .navbar-btn:hover {
+:root[data-theme="light"] .playground .navbar-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="dark"] .playground .navbar-btn:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -403,12 +413,20 @@
   transition: color 0.3s ease;
 }
 
+:root[data-theme="light"] .playground .menu-btn {
+  color: #111827;
+}
+
 .menu-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(128, 128, 128, 0.05);
   border-radius: 4px;
 }
 
-:root[data-theme="dark"] .menu-btn:hover {
+:root[data-theme="light"] .playground .menu-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="dark"] .playground .menu-btn:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -589,10 +607,68 @@
   padding: 24px;
 }
 
-.sidebar-footer {
-  padding-top: 24px;
+.sidebar-user-section {
+  padding: 16px 0 0 0;
   border-top: 1px solid var(--border-color);
   margin-top: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-user-name {
+  width: 100%;
+  text-align: left;
+  font-weight: 500;
+}
+
+.sidebar-user-info {
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.user-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-info-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+}
+
+.user-info-value {
+  font-size: 14px;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.user-logout-btn {
+  margin-top: 8px;
+  color: #ef4444;
+  width: 100%;
+  text-align: left;
+}
+
+.user-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.sidebar-footer {
+  padding-top: 16px;
   position: relative;
   z-index: 1;
 }

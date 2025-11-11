@@ -1,5 +1,28 @@
 .about { padding: 20px 0 64px; }
 .about-top { display: flex; align-items: center; gap: 8px; color: #e5e7eb; margin-bottom: 20px; }
+
+/* Navbar button styles for home button - independent of Playground theme */
+.navbar-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.navbar-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
 .about-content {
   max-width: 900px;
   margin: 80px auto 0;

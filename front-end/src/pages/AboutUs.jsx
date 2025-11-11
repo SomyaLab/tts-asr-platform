@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom'
+import { HiMiniHome } from 'react-icons/hi2'
 import './AboutUs.css'
 
 export default function AboutUs() {
   return (
     <section className="about">
       <div className="about-top">
-        <Link to="/" className="pg-back">←</Link>
-        <span>Home</span>
+        <Link to="/" className="navbar-btn home-btn" title="Home">
+          <HiMiniHome />
+        </Link>
       </div>
       <div className="about-content">
         <p className="lead">At Somya.ai, we’re on a mission to make generative AI real for Bharat.</p>

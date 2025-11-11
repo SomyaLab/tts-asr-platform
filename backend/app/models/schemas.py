@@ -52,3 +52,18 @@ class HealthResponse(BaseModel):
     asr_model_available: bool
     tts_model_available: bool
 
+
+class ContactFormRequest(BaseModel):
+    """Request schema for Contact Form."""
+    first: str = Field(..., min_length=1, description="First name")
+    last: str = Field(..., min_length=1, description="Last name")
+    email: str = Field(..., description="Email address")
+    phone: str = Field(..., description="Phone number")
+    company: str = Field(..., description="Company name")
+
+
+class ContactFormResponse(BaseModel):
+    """Response schema for Contact Form."""
+    success: bool = Field(..., description="Whether the submission was successful")
+    message: str = Field(..., description="Response message")
+

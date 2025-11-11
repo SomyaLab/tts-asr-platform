@@ -3,12 +3,11 @@ import './AuthModal.css'
 import { useAuth } from '../AuthContext.jsx'
 
 export default function AuthModal({ open, onClose }) {
-  const { signInWithGoogle, signInWithApple, emailPasswordSignIn, signUpStart, verifyOtpAndCreateUser } = useAuth()
-  const [mode, setMode] = useState('signin') // 'signin' | 'signup' | 'verify'
+  const { emailPasswordSignIn, signUp } = useAuth()
+  const [mode, setMode] = useState('signin') // 'signin' | 'signup'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
-  const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -18,7 +17,6 @@ export default function AuthModal({ open, onClose }) {
       setEmail('')
       setPassword('')
       setDisplayName('')
-      setOtp('')
       setError('')
     }
   }, [open])
@@ -44,24 +42,19 @@ export default function AuthModal({ open, onClose }) {
     setError('')
     setLoading(true)
     try {
-      await signUpStart({ email, password, displayName })
-      setMode('verify')
+      const result = await signUp({ email, password, displayName })
+      // If email confirmation is required, show message
+      if (result.user && !result.session) {
+        setError('Please check your email to confirm your account before signing in.')
+        setTimeout(() => {
+          setMode('signin')
+        }, 3000)
+      } else {
+        // User is signed up and logged in
+        onClose()
+      }
     } catch (err) {
       setError(err?.message || 'Sign up failed')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function onVerify(e) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      await verifyOtpAndCreateUser({ email, otp })
-      onClose()
-    } catch (err) {
-      setError(err?.message || 'Verification failed')
     } finally {
       setLoading(false)
     }
@@ -76,11 +69,6 @@ export default function AuthModal({ open, onClose }) {
 
         {mode === 'signin' && (
           <>
-            <div className="auth-providers">
-              <button className="social" onClick={async () => { await signInWithApple(); onClose() }}></button>
-              <button className="social" onClick={async () => { await signInWithGoogle(); onClose() }}>G</button>
-            </div>
-            <div className="auth-sep"><span>OR</span></div>
             <form className="auth-form" onSubmit={onSignIn}>
               <label className="auth-label">E-Mail Address</label>
               <input className="auth-input" type="email" required placeholder="Enter your email..." value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -108,22 +96,9 @@ export default function AuthModal({ open, onClose }) {
               <label className="auth-label">Password</label>
               <input className="auth-input" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
               {error && <div className="auth-error">{error}</div>}
-              <button className="auth-submit" type="submit" disabled={loading}>{loading ? 'Sending OTP...' : 'Sign Up'}</button>
+              <button className="auth-submit" type="submit" disabled={loading}>{loading ? 'Creating account...' : 'Sign Up'}</button>
             </form>
             <div className="auth-footer">Already have an account? <button className="link" onClick={() => setMode('signin')}>Sign In</button></div>
-          </>
-        )}
-
-        {mode === 'verify' && (
-          <>
-            <h3 className="auth-step">Verify your email</h3>
-            <p className="auth-sub">We've sent an OTP to {email}. Enter it below to verify.</p>
-            <form className="auth-form" onSubmit={onVerify}>
-              <label className="auth-label">OTP</label>
-              <input className="auth-input" inputMode="numeric" pattern="[0-9]*" required value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="123456" />
-              {error && <div className="auth-error">{error}</div>}
-              <button className="auth-submit" type="submit" disabled={loading || !otp}>{loading ? 'Verifying...' : 'Verify & Create Account'}</button>
-            </form>
           </>
         )}
       </div>
