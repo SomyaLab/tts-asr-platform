@@ -308,82 +308,10 @@ export default function VoiceDetail() {
               </button>
             </div>
           </div>
-          <div className="metadata-item">
-            <span className="metadata-label">Language Code:</span>
-            <div className="metadata-value-container">
-              <input
-                type="text"
-                value={language}
-                readOnly
-                className="metadata-input"
-              />
-              <button 
-                className="copy-btn"
-                onClick={() => handleCopy(language)}
-                aria-label="Copy language code"
-              >
-                <FaCopy />
-              </button>
-            </div>
-          </div>
-          <div className="metadata-item">
-            <span className="metadata-label">Gender:</span>
-            <div className="metadata-value-container">
-              <input
-                type="text"
-                value={gender.charAt(0).toUpperCase() + gender.slice(1)}
-                readOnly
-                className="metadata-input"
-              />
-              <button 
-                className="copy-btn"
-                onClick={() => handleCopy(gender)}
-                aria-label="Copy gender"
-              >
-                <FaCopy />
-              </button>
-            </div>
-          </div>
-          <div className="metadata-item">
-            <span className="metadata-label">Voice ID:</span>
-            <div className="metadata-value-container">
-              <input
-                type="text"
-                value={voiceIdValue}
-                readOnly
-                className="metadata-input"
-              />
-              <button 
-                className="copy-btn"
-                onClick={() => handleCopy(voiceIdValue)}
-                aria-label="Copy ID"
-              >
-                <FaCopy />
-              </button>
-            </div>
-          </div>
+          
           {voiceData.metadata && (
             <>
-              {voiceData.metadata.age && (
-                <div className="metadata-item">
-                  <span className="metadata-label">Age:</span>
-                  <div className="metadata-value-container">
-                    <input
-                      type="text"
-                      value={voiceData.metadata.age}
-                      readOnly
-                      className="metadata-input"
-                    />
-                    <button 
-                      className="copy-btn"
-                      onClick={() => handleCopy(voiceData.metadata.age)}
-                      aria-label="Copy age"
-                    >
-                      <FaCopy />
-                    </button>
-                  </div>
-                </div>
-              )}
+              
               {voiceData.metadata.accent && (
                 <div className="metadata-item">
                   <span className="metadata-label">Accent:</span>
@@ -418,26 +346,6 @@ export default function VoiceDetail() {
                       className="copy-btn"
                       onClick={() => handleCopy(voiceData.metadata.useCase)}
                       aria-label="Copy use case"
-                    >
-                      <FaCopy />
-                    </button>
-                  </div>
-                </div>
-              )}
-              {voiceData.metadata.quality && (
-                <div className="metadata-item">
-                  <span className="metadata-label">Quality:</span>
-                  <div className="metadata-value-container">
-                    <input
-                      type="text"
-                      value={voiceData.metadata.quality}
-                      readOnly
-                      className="metadata-input"
-                    />
-                    <button 
-                      className="copy-btn"
-                      onClick={() => handleCopy(voiceData.metadata.quality)}
-                      aria-label="Copy quality"
                     >
                       <FaCopy />
                     </button>

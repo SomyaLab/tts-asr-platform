@@ -980,16 +980,7 @@ export default function Playground() {
                       }}
                       style={{ cursor: 'pointer' }}
                     >
-                      <div className="voice-card-image-container">
-                        <img 
-                          src={localVoiceData?.image || `/${voice.language}-${voice.voice_name}.png`}
-                          alt={`${displayName} voice`}
-                          className="voice-card-image"
-                          onError={(e) => {
-                            e.target.src = '/umale.png' // Fallback image
-                          }}
-                        />
-                      </div>
+                      
                       <div className="voice-card-content">
                         <div className="voice-card-header">
                           <h3 className="voice-card-name">

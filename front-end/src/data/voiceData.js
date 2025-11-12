@@ -84,7 +84,7 @@ export const VOICE_METADATA = {
     male: {
       name: 'ranna',
       displayName: 'Ranna',
-      description: 'ವ್ಯಾಪಾರ ಮತ್ತು ಶೈಕ್ಷಣಿಕ ವಿಷಯಕ್ಕಾಗಿ ಸ್ಪಷ್ಟ ಮತ್ತು ವೃತ್ತಿಪರ ಪುರುಷ ಧ್ವನಿ। ಪ್ರಸ್ತುತಿಗಳು, ಟ್ಯುಟೋರಿಯಲ್ಗಳು ಮತ್ತು ಕಾರ್ಪೊರೇಟ್ ಸಂವಹನಕ್ಕಾಗಿ ಸೂಕ್ತವಾಗಿದೆ।',
+      description: 'ವ್ಯಾಪಾರ ಮತ್ತು ಶೈಕ್ಷಣಿಕ ವಿಷಯಕ್ಕಾಗಿ ಸ್ಪಷ್ಟ ಮತ್ತು ವೃತ್ತಿಪರ ಪುರುಷ ಧ್ವನಿ। ಪ್ರಸ್ತುತಿಗಳು, ಟ್ಯುಟೋರಿಯಲ್ಗಳು ಮತ್ತು ಕಾರ್ಪೊರೇಟ್ ಸಂವಹನಕ್ಕಾಗಿ ಸೂಕ್ತವಾಗಿದೆ.',
       image: '/Kannada-male.png',
       language: 'kn',
       languageName: 'Kannada',
@@ -97,13 +97,13 @@ export const VOICE_METADATA = {
         speed: 'Normal',
         tone: 'Professional'
       },
-      defaultPreviewText: 'ನಿಮ್ಮನ್ನು ಭೇಟಿಯಾಗಲು ಚೆನ್ನಾಗಿದೆ. ನಿಮ್ಮ ದಿನ ಚೆನ್ನಾಗಿ ಕಳೆಯುತ್ತಿದೆ ಎಂದು ಭಾವಿಸುತ್ತೇನೆ।',
+      defaultPreviewText: 'ನಿಮ್ಮನ್ನು ಭೇಟಿಯಾಗಲು ಚೆನ್ನಾಗಿದೆ. ನಿಮ್ಮ ದಿನ ಚೆನ್ನಾಗಿ ಕಳೆಯುತ್ತಿದೆ ಎಂದು ಭಾವಿಸುತ್ತೇನೆ.',
       voiceId: 'ranna'
     },
     female: {
       name: 'vidhya',
       displayName: 'Vidhya',
-      description: 'ಕಥೆ ಹೇಳುವಿಕೆ ಮತ್ತು ಗ್ರಾಹಕ ಸೇವೆಗೆ ಸೂಕ್ತವಾದ ಬೆಚ್ಚಗಿನ ಮತ್ತು ಸ್ನೇಹಪರ ಮಹಿಳಾ ಧ್ವನಿ। ಕಥೆಗಳು, ಗ್ರಾಹಕ ಬೆಂಬಲ ಮತ್ತು ಆಕರ್ಷಕ ವಿಷಯಗಳಿಗೆ ಸೂಕ್ತವಾಗಿದೆ।',
+      description: 'ಕಥೆ ಹೇಳುವಿಕೆ ಮತ್ತು ಗ್ರಾಹಕ ಸೇವೆಗೆ ಸೂಕ್ತವಾದ ಬೆಚ್ಚಗಿನ ಮತ್ತು ಸ್ನೇಹಪರ ಮಹಿಳಾ ಧ್ವನಿ। ಕಥೆಗಳು, ಗ್ರಾಹಕ ಬೆಂಬಲ ಮತ್ತು ಆಕರ್ಷಕ ವಿಷಯಗಳಿಗೆ ಸೂಕ್ತವಾಗಿದೆ.',
       image: '/Kannada-female.png',
       language: 'kn',
       languageName: 'Kannada',
@@ -116,7 +116,7 @@ export const VOICE_METADATA = {
         speed: 'Normal',
         tone: 'Warm and Friendly'
       },
-      defaultPreviewText: 'ನಿಮ್ಮನ್ನು ಭೇಟಿಯಾಗಲು ಚೆನ್ನಾಗಿದೆ. ನಿಮ್ಮ ದಿನ ಚೆನ್ನಾಗಿ ಕಳೆಯುತ್ತಿದೆ ಎಂದು ಭಾವಿಸುತ್ತೇನೆ।',
+      defaultPreviewText: 'ನಿಮ್ಮನ್ನು ಭೇಟಿಯಾಗಲು ಚೆನ್ನಾಗಿದೆ. ನಿಮ್ಮ ದಿನ ಚೆನ್ನಾಗಿ ಕಳೆಯುತ್ತಿದೆ ಎಂದು ಭಾವಿಸುತ್ತೇನೆ.',
       voiceId: 'vidhya'
     }
   },
@@ -124,7 +124,7 @@ export const VOICE_METADATA = {
     male: {
       name: 'arush',
       displayName: 'Arush',
-      description: 'వ్యాపారం మరియు విద్యా కంటెంట్ కోసం స్పష్టమైన మరియు ప్రొఫెషనల్ పురుష వాయిస్। ప్రజంటేషన్లు, ట్యుటోరియల్స్ మరియు కార్పొరేట్ కమ్యూనికేషన్లకు సరైనది।',
+      description: 'వ్యాపారం మరియు విద్యా కంటెంట్ కోసం స్పష్టమైన మరియు ప్రొఫెషనల్ పురుష వాయిస్। ప్రజంటేషన్లు, ట్యుటోరియల్స్ మరియు కార్పొరేట్ కమ్యూనికేషన్లకు సరైనది.',
       image: '/telugu-male.png',
       language: 'te',
       languageName: 'Telugu',
@@ -137,13 +137,13 @@ export const VOICE_METADATA = {
         speed: 'Normal',
         tone: 'Professional'
       },
-      defaultPreviewText: 'మిమ్మల్ని కలవడం చాలా బాగుంది. మీరు మంచి రోజు గడుపుతున్నారని ఆశిస్తున్నాను।',
+      defaultPreviewText: 'మిమ్మల్ని కలవడం చాలా బాగుంది. మీరు మంచి రోజు గడుపుతున్నారని ఆశిస్తున్నాను',
       voiceId: 'voice1'
     },
     female: {
       name: 'bhagya',
       displayName: 'Bhagya',
-      description: 'కథలు చెప్పడం మరియు కస్టమర్ సేవకు సరైన వెచ్చని మరియు స్నేహపూర్వక మహిళా వాయిస్। కథలు, కస్టమర్ మద్దతు మరియు ఆకర్షణీయమైన కంటెంట్ కోసం సరైనది।',
+      description: 'కథలు చెప్పడం మరియు కస్టమర్ సేవకు సరైన వెచ్చని మరియు స్నేహపూర్వక మహిళా వాయిస్। కథలు, కస్టమర్ మద్దతు మరియు ఆకర్షణీయమైన కంటెంట్ కోసం సరైనది.',
       image: '/telugu-female.png',
       language: 'te',
       languageName: 'Telugu',
@@ -156,7 +156,7 @@ export const VOICE_METADATA = {
         speed: 'Normal',
         tone: 'Warm and Friendly'
       },
-      defaultPreviewText: 'మిమ్మల్ని కలవడం చాలా బాగుంది. మీరు మంచి రోజు గడుపుతున్నారని ఆశిస్తున్నాను।',
+      defaultPreviewText: 'మిమ్మల్ని కలవడం చాలా బాగుంది. మీరు మంచి రోజు గడుపుతున్నారని ఆశిస్తున్నాను',
       voiceId: 'bhagya'
     }
   },
