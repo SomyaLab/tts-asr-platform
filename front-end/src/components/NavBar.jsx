@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import './NavBar.css'
 import AuthModal from './AuthModal.jsx'
 import { useAuth } from '../AuthContext.jsx'
@@ -7,6 +7,7 @@ import { IoMenu } from 'react-icons/io5'
 
 export default function NavBar() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
   const [onLight, setOnLight] = useState(false)
 
@@ -51,6 +52,30 @@ export default function NavBar() {
   }, [])
 
   const [authOpen, setAuthOpen] = useState(false)
+  const shouldNavigateAfterLogin = useRef(false)
+
+  const handlePlaygroundClick = (e) => {
+    e.preventDefault()
+    setMenuOpen(false)
+    if (!user) {
+      shouldNavigateAfterLogin.current = true
+      setAuthOpen(true)
+    } else {
+      navigate('/playground')
+    }
+  }
+
+  const handleAuthClose = () => {
+    setAuthOpen(false)
+  }
+
+  // Navigate to playground after successful login
+  useEffect(() => {
+    if (user && shouldNavigateAfterLogin.current && !authOpen) {
+      shouldNavigateAfterLogin.current = false
+      navigate('/playground')
+    }
+  }, [user, authOpen, navigate])
 
   return (
     <>
@@ -84,7 +109,7 @@ export default function NavBar() {
             {!user && (
               <button className="link-btn" onClick={() => { setMenuOpen(false); setAuthOpen(true) }}>Login</button>
             )}
-            <Link to="/playground" className="primary-cta" onClick={() => setMenuOpen(false)}>Playground</Link>
+            <a href="/playground" className="primary-cta" onClick={handlePlaygroundClick}>Playground</a>
           </div>
 
           {/* Collapsible dropdown (mobile) */}
@@ -99,12 +124,12 @@ export default function NavBar() {
               {!user && (
                 <button className="link-btn" onClick={() => { setMenuOpen(false); setAuthOpen(true) }}>Login</button>
               )}
-              <Link to="/playground" className="primary-cta" onClick={() => setMenuOpen(false)}>Playground</Link>
+              <a href="/playground" className="primary-cta" onClick={handlePlaygroundClick}>Playground</a>
             </div>
           </div>
         </div>
       </div>
-      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+      <AuthModal open={authOpen} onClose={handleAuthClose} />
     </header>
     {menuOpen && <div className="nav-scrim" onClick={() => setMenuOpen(false)} />}
     </>

@@ -4,6 +4,8 @@ import './Home.css'
 import AudioPlayer from '../components/AudioPlayer.jsx'
 import { BLOGS } from './blogsData.js'
 import { STORIES } from './storiesData.js'
+import { useAuth } from '../AuthContext.jsx'
+import AuthModal from '../components/AuthModal.jsx'
 
 const STEPS = [
   { id: 'Text to Speech', label: 'Text to Speech', body: 'Convert text into natural audio' },
@@ -12,10 +14,13 @@ const STEPS = [
 
 
 export default function Home() {
+  const { user } = useAuth()
   const [active, setActive] = useState('Text to Speech')
   const [hoveredBlogId, setHoveredBlogId] = useState(BLOGS[0].id)
   const blogDetailRef = useRef(null)
   const navigate = useNavigate()
+  const [authOpen, setAuthOpen] = useState(false)
+  const shouldNavigateAfterLogin = useRef(false)
   // TTS controls
   const [ttsLanguage, setTtsLanguage] = useState('sa')
   const [ttsVoice, setTtsVoice] = useState('male')
@@ -79,6 +84,28 @@ export default function Home() {
     navigate(`/blogs/${id}`)
   }
 
+  const handlePlaygroundClick = (e) => {
+    e.preventDefault()
+    if (!user) {
+      shouldNavigateAfterLogin.current = true
+      setAuthOpen(true)
+    } else {
+      navigate('/playground')
+    }
+  }
+
+  const handleAuthClose = () => {
+    setAuthOpen(false)
+  }
+
+  // Navigate to playground after successful login
+  useEffect(() => {
+    if (user && shouldNavigateAfterLogin.current && !authOpen) {
+      shouldNavigateAfterLogin.current = false
+      navigate('/playground')
+    }
+  }, [user, authOpen, navigate])
+
   return (
     <>
     <section className="hero">
@@ -86,7 +113,7 @@ export default function Home() {
         <div className="hero-copy" >
           <h1><span className="accent">समानो मन्त्रः समितिः समानी, <br />समानं मनः सहचित्तमेषाम्।</span> </h1>
           <p>Build speech experiences with instant Text‑to‑Speech and Speech‑to‑Text.</p>
-          <Link to="/playground" className="primary-cta">Get Started</Link>
+          <a href="/playground" className="primary-cta" onClick={handlePlaygroundClick}>Get Started</a>
 
           <div className="steps">
             {STEPS.map((s, idx) => (
@@ -261,7 +288,7 @@ export default function Home() {
       <div className="footer-cta">
         <div className="footer-cta-inner">
           <h2>Get started with Somya Labs</h2>
-          <a className="footer-cta-btn" type="button" href="/playground">Open Playground</a>
+          <a className="footer-cta-btn" type="button" href="/playground" onClick={handlePlaygroundClick}>Open Playground</a>
         </div>
       </div>
 
@@ -301,6 +328,7 @@ export default function Home() {
         </div>
       </div>
     </footer>
+    <AuthModal open={authOpen} onClose={handleAuthClose} />
     </>
   );
 }
