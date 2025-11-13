@@ -17,13 +17,13 @@ export default function Home() {
   const blogDetailRef = useRef(null)
   const navigate = useNavigate()
   // TTS controls
-  const [ttsLanguage, setTtsLanguage] = useState('en')
-  const [ttsVoice, setTtsVoice] = useState('female')
-  const [ttsSrc, setTtsSrc] = useState('/en-female.mp3')
+  const [ttsLanguage, setTtsLanguage] = useState('sa')
+  const [ttsVoice, setTtsVoice] = useState('male')
+  const [ttsSrc, setTtsSrc] = useState('/sa-male.wav')
 
   // ASR controls
-  const [asrLanguage, setAsrLanguage] = useState('en')
-  const [asrSrc, setAsrSrc] = useState('/en-male.mp3')
+  const [asrLanguage, setAsrLanguage] = useState('sa')
+  const [asrSrc, setAsrSrc] = useState('/sa-male.wav')
   const [transcribedText, setTranscribedText] = useState('')
 
   // Map languages/voices to files in public/ (update with your real filenames)
@@ -86,7 +86,7 @@ export default function Home() {
         <div className="hero-copy" >
           <h1><span className="accent">समानो मन्त्रः समितिः समानी, <br />समानं मनः सहचित्तमेषाम्।</span> </h1>
           <p>Build speech experiences with instant Text‑to‑Speech and Speech‑to‑Text.</p>
-          <Link to="/playground" className="primary-cta">Open Playground</Link>
+          <Link to="/playground" className="primary-cta">Get Started</Link>
 
           <div className="steps">
             {STEPS.map((s, idx) => (
