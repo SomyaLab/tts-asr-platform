@@ -3,13 +3,16 @@ import './AuthModal.css'
 import { useAuth } from '../AuthContext.jsx'
 
 export default function AuthModal({ open, onClose }) {
-  const { emailPasswordSignIn, signUp } = useAuth()
+  const { emailPasswordSignIn, signUp, resendConfirmationEmail } = useAuth()
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showResendConfirmation, setShowResendConfirmation] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSuccess, setResendSuccess] = useState(false)
 
   useEffect(() => {
     if (!open) {
@@ -41,14 +44,17 @@ export default function AuthModal({ open, onClose }) {
     e.preventDefault()
     setError('')
     setLoading(true)
+    setShowResendConfirmation(false)
+    setResendSuccess(false)
     try {
       const result = await signUp({ email, password, displayName })
       // If email confirmation is required, show message
       if (result.user && !result.session) {
         setError('Please check your email to confirm your account before signing in.')
+        setShowResendConfirmation(true)
         setTimeout(() => {
           setMode('signin')
-        }, 3000)
+        }, 5000)
       } else {
         // User is signed up and logged in
         onClose()
@@ -57,6 +63,28 @@ export default function AuthModal({ open, onClose }) {
       setError(err?.message || 'Sign up failed')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleResendConfirmation() {
+    if (!email) {
+      setError('Please enter your email address first.')
+      return
+    }
+    setResendLoading(true)
+    setError('')
+    setResendSuccess(false)
+    try {
+      await resendConfirmationEmail(email)
+      setResendSuccess(true)
+      setError('')
+      setTimeout(() => {
+        setResendSuccess(false)
+      }, 5000)
+    } catch (err) {
+      setError(err?.message || 'Failed to resend confirmation email. Please try again.')
+    } finally {
+      setResendLoading(false)
     }
   }
 
@@ -96,6 +124,20 @@ export default function AuthModal({ open, onClose }) {
               <label className="auth-label">Password</label>
               <input className="auth-input" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
               {error && <div className="auth-error">{error}</div>}
+              {resendSuccess && <div style={{ color: 'green', fontSize: '14px', marginTop: '10px' }}>Confirmation email sent! Please check your inbox.</div>}
+              {showResendConfirmation && (
+                <div style={{ marginTop: '10px', fontSize: '14px' }}>
+                  <button 
+                    type="button" 
+                    className="link" 
+                    onClick={handleResendConfirmation}
+                    disabled={resendLoading}
+                    style={{ padding: 0, background: 'none', border: 'none', cursor: resendLoading ? 'not-allowed' : 'pointer' }}
+                  >
+                    {resendLoading ? 'Sending...' : "Didn't receive the email? Resend confirmation"}
+                  </button>
+                </div>
+              )}
               <button className="auth-submit" type="submit" disabled={loading}>{loading ? 'Creating account...' : 'Sign Up'}</button>
             </form>
             <div className="auth-footer">Already have an account? <button className="link" onClick={() => setMode('signin')}>Sign In</button></div>
