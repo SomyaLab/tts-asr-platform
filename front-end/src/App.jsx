@@ -168,8 +168,9 @@ function App() {
   // Track page views for Google Analytics on route changes
   useEffect(() => {
     if (typeof window.gtag !== 'undefined') {
-      window.gtag('config', 'G-LN52PD2V48', {
-        page_path: location.pathname + location.search
+      window.gtag('event', 'page_view', {
+        page_path: location.pathname + location.search,
+        page_title: document.title
       })
     }
   }, [location])
