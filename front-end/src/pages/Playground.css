@@ -1325,6 +1325,11 @@
   transition: color 0.3s ease;
 }
 
+@media (prefers-color-scheme: light) {
+  .control-label {
+    color: #000000;
+  }
+}
 .control-value {
   font-size: 13px;
   color: var(--text-tertiary);

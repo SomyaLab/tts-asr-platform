@@ -12,6 +12,20 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   padding: 0;
+
+  /* Card styling variables - default to dark theme */
+  --card-bg-gradient: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.3) 0%,
+    rgba(15, 23, 42, 0.25) 50%,
+    rgba(30, 41, 59, 0.2) 100%
+  );
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-blur: 60px;
+  --card-shadow-outer-1: 0 20px 60px rgba(0, 0, 0, 0.4);
+  --card-shadow-outer-2: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --card-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --card-shadow-inset-bottom: inset 0 -1px 0 rgba(255, 255, 255, 0.03);
 }
 
 a {
@@ -65,6 +79,20 @@ button:active {
   :root {
     color: #213547;
     background-color: #ffffff;
+
+    /* Card styling variables - light theme */
+    --card-bg-gradient: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    --card-border: rgba(255, 255, 255, 0.3);
+    --card-blur: 60px;
+    --card-shadow-outer-1: 0 20px 60px rgba(0, 0, 0, 0.15);
+    --card-shadow-outer-2: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --card-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    --card-shadow-inset-bottom: inset 0 -1px 0 rgba(255, 255, 255, 0.2);
   }
   body {
     background: #ffffff;

@@ -14,6 +14,7 @@ import { LiaDownloadSolid } from 'react-icons/lia'
 import AudioPlayer from '../components/AudioPlayer.jsx'
 import { getAllVoices } from '../data/voiceData.js'
 import AccountModal from '../components/AccountModal.jsx'
+import { getUserAvatarUrl } from '../utils/avatarUtils.js'
 
 export default function Playground() {
   const { user, signOut } = useAuth()
@@ -22,7 +23,7 @@ export default function Playground() {
   const [textToSpeak, setTextToSpeak] = useState('')
   const [selectedModel, setSelectedModel] = useState('Panini 0.1')
   const [selectedVoice, setSelectedVoice] = useState('diana') // Default to first English voice
-  const [ttsLanguage, setTtsLanguage] = useState('en')
+  const [ttsLanguage, setTtsLanguage] = useState('')
   const [availableVoices, setAvailableVoices] = useState([])
   const [transcriptLanguage, setTranscriptLanguage] = useState('')
   const [speed, setSpeed] = useState(1.0)
@@ -44,7 +45,7 @@ export default function Playground() {
   const [inputMethod, setInputMethod] = useState('record') // 'record' or 'upload'
   const [transcribedText, setTranscribedText] = useState('')
   const [isTranscribing, setIsTranscribing] = useState(false)
-  const [asrLanguage, setAsrLanguage] = useState('en')
+  const [asrLanguage, setAsrLanguage] = useState('')
   const speechToTextFileInputRef = useRef(null)
   const [cloneName, setCloneName] = useState('')
   const [cloneDescription, setCloneDescription] = useState('')
@@ -65,7 +66,7 @@ export default function Playground() {
   const fileInputRef = useRef(null)
   const [showClonePreview, setShowClonePreview] = useState(false)
   const [clonePreviewText, setClonePreviewText] = useState("It's nice to meet you. Hope you're having a great day.")
-  const [clonePreviewLanguage, setClonePreviewLanguage] = useState('en')
+  const [clonePreviewLanguage, setClonePreviewLanguage] = useState('')
   const [clonePreviewAudio, setClonePreviewAudio] = useState(null)
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
   // Fix API base URL - remove trailing /api if present to avoid double /api/api
@@ -215,7 +216,12 @@ export default function Playground() {
   }
 
   const handleSpeak = async () => {
-    if (isSending || !textToSpeak.trim()) return
+    if (isSending || !textToSpeak.trim() || !ttsLanguage) {
+      if (!ttsLanguage) {
+        alert('Please select a language first')
+      }
+      return
+    }
     setIsSending(true)
     try {
       const requestBody = { 
@@ -295,7 +301,12 @@ export default function Playground() {
   }
 
   const handleClonePreview = async () => {
-    if (isGeneratingPreview || !clonePreviewText.trim()) return
+    if (isGeneratingPreview || !clonePreviewText.trim() || !clonePreviewLanguage) {
+      if (!clonePreviewLanguage) {
+        alert('Please select a language first')
+      }
+      return
+    }
     setIsGeneratingPreview(true)
     
     try {
@@ -622,6 +633,22 @@ export default function Playground() {
                 </div>
               </button>
             </div>
+            {user && (
+              <button 
+                className="navbar-btn user-btn" 
+                onClick={() => setShowAccountModal(true)}
+                title={user.name || user.email}
+              >
+                <img 
+                  src={getUserAvatarUrl(user)} 
+                  alt={user.name || user.email} 
+                  className="user-avatar"
+                  onError={(e) => {
+                    e.target.src = '/male.png'
+                  }}
+                />
+              </button>
+            )}
           </div>
         </nav>
       </div>
@@ -690,8 +717,17 @@ export default function Playground() {
                 <button 
                   className="nav-item sidebar-user-name"
                   onClick={() => setShowAccountModal(true)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
-                  {user.name || user.email}
+                  <img 
+                    src={getUserAvatarUrl(user)} 
+                    alt={user.name || user.email} 
+                    style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }}
+                    onError={(e) => {
+                      e.target.src = '/male.png'
+                    }}
+                  />
+                  <span>{user.name || user.email}</span>
                 </button>
               </div>
             </div>
@@ -754,7 +790,7 @@ export default function Playground() {
                 <button
                     className="speak-btn"
                     onClick={handleSpeak}
-                    disabled={isSending || !textToSpeak.trim()}
+                    disabled={isSending || !textToSpeak.trim() || !ttsLanguage}
                   >
                     <FaPlay />
                     Speak
@@ -882,13 +918,21 @@ export default function Playground() {
                   className="control-select"
                   value={ttsLanguage}
                   onChange={(e) => setTtsLanguage(e.target.value)}
+                  required
                 >
+                  <option value="" disabled>Select language</option>
                   <option value="en">English</option>
                   <option value="hi">Hindi</option>
                   <option value="kn">Kannada</option>
                   <option value="te">Telugu</option>
                   <option value="mr">Marathi</option>
                   <option value="sa">Sanskrit</option>
+                  <option value="bn">Bengali</option>
+                  <option value="bh">Bhojpuri</option>
+                  <option value="mh">Maithili</option>
+                  <option value="mg">Magahi</option>
+                  <option value="ch">Chhattisgarhi</option>
+                  <option value="gu">Gujarati</option>
                 </select>
               </div>
 
@@ -953,7 +997,13 @@ export default function Playground() {
                   kn: 'Kannada',
                   te: 'Telugu',
                   mr: 'Marathi',
-                  sa: 'Sanskrit'
+                  sa: 'Sanskrit',
+                  bn: 'Bengali',
+                  bh: 'Bhojpuri',
+                  mh: 'Maithili',
+                  mg: 'Magahi',
+                  ch: 'Chhattisgarhi',
+                  gu: 'Gujarati'
                 }
                 
                 return voicesToDisplay.map((voice) => {
@@ -1012,13 +1062,21 @@ export default function Playground() {
                   className="speech-to-text-language-select"
                   value={asrLanguage}
                   onChange={(e) => setAsrLanguage(e.target.value)}
+                  required
                 >
+                  <option value="" disabled>Select language</option>
                   <option value="en">English</option>
                   <option value="hi">Hindi</option>
                   <option value="kn">Kannada</option>
                   <option value="te">Telugu</option>
                   <option value="mr">Marathi</option>
                   <option value="sa">Sanskrit</option>
+                  <option value="bn">Bengali</option>
+                  <option value="bh">Bhojpuri</option>
+                  <option value="mh">Maithili</option>
+                  <option value="mg">Magahi</option>
+                  <option value="ch">Chhattisgarhi</option>
+                  <option value="gu">Gujarati</option>
                 </select>
               </div>
             </div>
@@ -1154,6 +1212,10 @@ export default function Playground() {
                   <button 
                     className="transcribe-btn"
                     onClick={async () => {
+                      if (!asrLanguage) {
+                        alert('Please select a language first')
+                        return
+                      }
                       if (recordedBlob) {
                         setIsTranscribing(true)
                         try {
@@ -1178,7 +1240,7 @@ export default function Playground() {
                         }
                       }
                     }}
-                    disabled={isTranscribing}
+                    disabled={isTranscribing || !asrLanguage}
                   >
                     {isTranscribing ? 'Transcribing...' : 'Transcribe'}
                   </button>
@@ -1235,8 +1297,8 @@ export default function Playground() {
                   
                   // Store clone data for later use
                   setShowClonePreview(true)
-                  // Default to English for preview
-                  setClonePreviewLanguage('en')
+                  // Reset language selection for preview
+                  setClonePreviewLanguage('')
                   setClonePreviewText("It's nice to meet you. Hope you're having a great day.")
                 }}
                 disabled={!cloneName || !recordedBlob}
@@ -1487,13 +1549,21 @@ export default function Playground() {
                       className="clone-preview-select"
                       value={clonePreviewLanguage}
                       onChange={(e) => setClonePreviewLanguage(e.target.value)}
+                      required
                     >
+                      <option value="" disabled>Select language</option>
                       <option value="en">English</option>
                       <option value="hi">Hindi</option>
                       <option value="kn">Kannada</option>
                       <option value="te">Telugu</option>
                       <option value="mr">Marathi</option>
                       <option value="sa">Sanskrit</option>
+                      <option value="bn">Bengali</option>
+                      <option value="bh">Bhojpuri</option>
+                      <option value="mh">Maithili</option>
+                      <option value="mg">Magahi</option>
+                      <option value="ch">Chhattisgarhi</option>
+                      <option value="gu">Gujarati</option>
                     </select>
                   </div>
                   
@@ -1508,7 +1578,7 @@ export default function Playground() {
                   <button
                     className="clone-preview-speak-btn"
                     onClick={handleClonePreview}
-                    disabled={isGeneratingPreview || !clonePreviewText.trim()}
+                    disabled={isGeneratingPreview || !clonePreviewText.trim() || !clonePreviewLanguage}
                   >
                     <FaPlay />
                     {isGeneratingPreview ? 'Generating...' : 'Speak'}

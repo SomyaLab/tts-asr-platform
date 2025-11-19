@@ -22,13 +22,13 @@ export default function Home() {
   const [authOpen, setAuthOpen] = useState(false)
   const shouldNavigateAfterLogin = useRef(false)
   // TTS controls
-  const [ttsLanguage, setTtsLanguage] = useState('sa')
+  const [ttsLanguage, setTtsLanguage] = useState('')
   const [ttsVoice, setTtsVoice] = useState('male')
-  const [ttsSrc, setTtsSrc] = useState('/sa-male.wav')
+  const [ttsSrc, setTtsSrc] = useState('')
 
   // ASR controls
-  const [asrLanguage, setAsrLanguage] = useState('sa')
-  const [asrSrc, setAsrSrc] = useState('/sa-male.wav')
+  const [asrLanguage, setAsrLanguage] = useState('')
+  const [asrSrc, setAsrSrc] = useState('')
   const [transcribedText, setTranscribedText] = useState('')
 
   // Map languages/voices to files in public/ (update with your real filenames)
@@ -38,7 +38,13 @@ export default function Home() {
     kn: { female: '/kn-female.mp3', male: '/kn-male.mp3' },
     mr: { female: '/mr-female.wav', male: '/mr-male.wav' }, 
     te: { female: '/te-female.wav', male: '/te-male.wav' }, 
-    sa: { female: '/sa-female.wav', male: '/sa-male.wav' }, 
+    sa: { female: '/sa-female.wav', male: '/sa-male.wav' },
+    bn: { female: '/bn-female.wav', male: '/bn-male.wav' },
+    bh: { female: '/bh-female.wav', male: '/bh-male.wav' },
+    mh: { female: '/mh-female.wav', male: '/mh-male.wav' },
+    mg: { female: '/mg-female.wav', male: '/mg-male.wav' },
+    ch: { female: '/ch-female.wav', male: '/ch-male.wav' },
+    gu: { female: '/gu-female.wav', male: '/gu-male.wav' }
   }
 
   // ASR demo audio files (using male voices for demo)
@@ -48,7 +54,13 @@ export default function Home() {
     kn: '/kn-male.mp3',
     mr: '/mr-male.wav', 
     te: '/te-male.wav', 
-    sa: '/sa-male.wav', 
+    sa: '/sa-male.wav',
+    bn: '/bn-male.wav',
+    bh: '/bh-male.wav',
+    mh: '/mh-male.wav',
+    mg: '/mg-male.wav',
+    ch: '/ch-male.wav',
+    gu: '/gu-male.wav'
   }
 
 
@@ -59,22 +71,40 @@ export default function Home() {
     hi: 'हम आपका हार्दिक स्वागत करते हैं सोम्या लैब में एक ऐसा स्थल जहाँ हम दुनिया की अनेक आवाज़ों का उत्सव मनाते और उन्हें संजोकर रखते हैं।',
     te: 'మేము మిమ్మల్ని హృదయపూర్వకంగా స్వాగతిస్తున్నాము సోమ్యా ల్యాబ్‌కి ఇది ప్రపంచంలోని అనేక స్వరాలను జరుపుకునే మరియు సంరక్షించే గృహం.',
     mr: 'आम्ही तुमचं हार्दिक स्वागत करतो सोम्या लॅबमध्ये जगातील अनेक आवाज साजरे आणि जपले जाणारे एक घर।',
-    sa: 'वयं सोम्या प्रयोगशालायां हृदयपूर्वकं स्वागतं कुर्मः यत्र जगतः नानावाणीः उत्सवयामः च रक्षामः च।'
+    sa: 'वयं सोम्या प्रयोगशालायां हृदयपूर्वकं स्वागतं कुर्मः यत्र जगतः नानावाणीः उत्सवयामः च रक्षामः च।',
+    bn: 'আমরা আপনাকে সোম্যা ল্যাবে আন্তরিকভাবে স্বাগত জানাই, বিশ্বের বহু কণ্ঠ উদযাপন ও সংরক্ষণের একটি ঘর।',
+    bh: 'हम आपका हार्दिक स्वागत करते हैं सोम्या लैब में एक ऐसा स्थल जहाँ हम दुनिया की अनेक आवाज़ों का उत्सव मनाते और उन्हें संजोकर रखते हैं।',
+    mh: 'हम आपका हार्दिक स्वागत करते हैं सोम्या लैब में एक ऐसा स्थल जहाँ हम दुनिया की अनेक आवाज़ों का उत्सव मनाते और उन्हें संजोकर रखते हैं।',
+    mg: 'हम आपका हार्दिक स्वागत करते हैं सोम्या लैब में एक ऐसा स्थल जहाँ हम दुनिया की अनेक आवाज़ों का उत्सव मनाते और उन्हें संजोकर रखते हैं।',
+    ch: 'हम आपका हार्दिक स्वागत करते हैं सोम्या लैब में एक ऐसा स्थल जहाँ हम दुनिया की अनेक आवाज़ों का उत्सव मनाते और उन्हें संजोकर रखते हैं।',
+    gu: 'અમે તમને સોમ્યા લેબમાં હૃદયપૂર્વક સ્વાગત કરીએ છીએ, એક એવું સ્થાન જ્યાં આપણે વિશ્વની અનેક અવાજોનો ઉત્સવ મનાવીએ છીએ અને તેમને સાચવીએ છીએ.'
   }
 
   useEffect(() => {
-    const path = AUDIO_FILES[ttsLanguage]?.[ttsVoice] ?? '/en-female.mp3'
-    setTtsSrc(path)
+    if (ttsLanguage) {
+      const path = AUDIO_FILES[ttsLanguage]?.[ttsVoice] ?? '/en-female.mp3'
+      setTtsSrc(path)
+    } else {
+      setTtsSrc('')
+    }
   }, [ttsLanguage, ttsVoice])
 
   useEffect(() => {
-    const path = ASR_AUDIO_FILES[asrLanguage] ?? '/en-male.mp3'
-    setAsrSrc(path)
+    if (asrLanguage) {
+      const path = ASR_AUDIO_FILES[asrLanguage] ?? '/en-male.mp3'
+      setAsrSrc(path)
+    } else {
+      setAsrSrc('')
+    }
     // Clear transcribed text when language changes
     setTranscribedText('')
   }, [asrLanguage])
 
   const handleTranscribe = () => {
+    if (!asrLanguage) {
+      alert('Please select a language first')
+      return
+    }
     // Show pre-written demo text for selected language
     const demoText = DEMO_TEXTS[asrLanguage] || DEMO_TEXTS.en
     setTranscribedText(demoText)
@@ -113,54 +143,65 @@ export default function Home() {
         <div className="hero-copy" >
           <h1><span className="accent">समानो मन्त्रः समितिः समानी, <br />समानं मनः सहचित्तमेषाम्।</span> </h1>
           <p>Build speech experiences with instant Text‑to‑Speech and Speech‑to‑Text.</p>
-          <a href="/playground" className="primary-cta" onClick={handlePlaygroundClick}>Get Started</a>
-
-          <div className="steps">
-            {STEPS.map((s, idx) => (
-              <button
-                key={s.id}
-                className={`step ${active === s.id ? 'active' : ''}`}
-                onClick={() => setActive(s.id)}
-              >
-                <span className="step-index">{idx + 1}</span>
-                <div className="step-text">
-                  <div className="step-title">{s.label}</div>
-                  <div className="step-desc">{s.body}</div>
-                </div>
-              </button>
-            ))}
+          <div className="cta-container">
+            <a href="/playground" className="primary-cta" onClick={handlePlaygroundClick}>Explore Our Playground</a>
+            <p className="or-text">OR</p>
           </div>
         </div>
 
         <div className="hero-demo">
+          <div className="steps">
+              {STEPS.map((s, idx) => (
+                <button
+                  key={s.id}
+                  className={`step ${active === s.id ? 'active' : ''}`}
+                  onClick={() => setActive(s.id)}
+                >
+                  <div className="step-text">
+                    <div className="step-title">{s.label}</div>
+                    <div className="step-desc">{s.body}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
           {active === 'Text to Speech' && (
             <div className="demo-card tts">
-              <div className="demo-text">{DEMO_TEXTS[ttsLanguage] || DEMO_TEXTS.en}</div>
-              <div style={{ display: 'flex', gap: 24, alignItems: 'center', margin: '24px 24px 24px 24px'}}>
-                <span style={{ opacity: 0.85 }}>Language:</span>
-                <select className="tts-select" value={ttsLanguage} onChange={(e) => setTtsLanguage(e.target.value)}>
-                  <option value="sa">Sanskrit</option> 
+              <p className="demo-note" >Text to Speech converts your input into natural‑sounding audio. Choose a language and voice, then press play to preview.</p>
+              <div className="demo-text">{ttsLanguage ? (DEMO_TEXTS[ttsLanguage] || DEMO_TEXTS.en) : 'Please select a language to see demo text.'}</div>
+              <div className="tts-controls">
+                <span className="control-label">Language:</span>
+                <select className="tts-select" value={ttsLanguage} onChange={(e) => setTtsLanguage(e.target.value)} required>
+                  <option value="" disabled>Select language</option>
+                  <option value="sa">Sanskrit</option> 
                   <option value="hi">Hindi</option>
                   <option value="kn">Kannada</option>
                   <option value="mr">Marathi</option>
                   <option value="te">Telugu</option>
                   <option value="en">English</option>
+                  <option value="bn">Bengali</option>
+                  <option value="bh">Bhojpuri</option>
+                  <option value="mh">Maithili</option>
+                  <option value="mg">Magahi</option>
+                  <option value="ch">Chhattisgarhi</option>
+                  <option value="gu">Gujarati</option>
                 </select>
-                <span style={{ opacity: 0.85}} >Voice:</span>
+                <span className="control-label">Voice:</span>
                 <select className="tts-select" value={ttsVoice} onChange={(e) => setTtsVoice(e.target.value)}>
                   <option value="female">Female</option>
                   <option value="male">Male</option>
                 </select>
               </div>
               <AudioPlayer src={ttsSrc} />
-              <p className="demo-note" >Text to Speech converts your input into natural‑sounding audio. Choose a language and voice, then press play to preview.</p>
+              
             </div>
           )}
           {active === 'Speech to Text' && (
             <div className="demo-card stt" >
+              
+              <p className="demo-note">Speech to Text transcribes spoken audio into text. Select a language, play the sample, then click Transcribe to see the result.</p>
               <AudioPlayer src={asrSrc} />
-              <div style={{ display: 'flex', gap: 16, alignItems: 'center', margin: '24px 24px 16px 24px', flexWrap: 'wrap' }}>
-                <span style={{ opacity: 0.85 }}>Language:</span>
+              <div className="stt-controls">
+                <span className="control-label">Language:</span>
                 <select 
                   className="tts-select" 
                   value={asrLanguage} 
@@ -168,32 +209,34 @@ export default function Home() {
                     setAsrLanguage(e.target.value)
                     setTranscribedText('') // Clear text when language changes
                   }}
+                  required
                 >
+                  <option value="" disabled>Select language</option>
                   <option value="en">English</option>
                   <option value="hi">Hindi</option>
                   <option value="kn">Kannada</option>
                   <option value="mr">Marathi</option>
                   <option value="te">Telugu</option>
                   <option value="sa">Sanskrit</option>
+                  <option value="bn">Bengali</option>
+                  <option value="bh">Bhojpuri</option>
+                  <option value="mh">Maithili</option>
+                  <option value="mg">Magahi</option>
+                  <option value="ch">Chhattisgarhi</option>
+                  <option value="gu">Gujarati</option>
                 </select>
                 <button 
                   className="transcribe-btn-home"
                   onClick={handleTranscribe}
+                  disabled={!asrLanguage}
                 >
                   Transcribe
                 </button>
               </div>
-              <div className="demo-text" align="left" style={{ 
-                margin: '0 24px 16px 24px', 
-                padding: '16px', 
-                backgroundColor: transcribedText ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.05)', 
-                borderRadius: '8px',
-                border: transcribedText ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid rgba(255,255,255,0.1)',
-                minHeight: '60px'
-              }}>
+              <div className={`demo-text stt-transcribed-text ${transcribedText ? 'has-text' : ''}`}>
                 {transcribedText || ''}
               </div>
-              <p className="demo-note">Speech to Text transcribes spoken audio into text. Select a language, play the sample, then click Transcribe to see the result.</p>
+              
             </div>
           )}
         </div>

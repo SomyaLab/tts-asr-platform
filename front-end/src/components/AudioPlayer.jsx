@@ -18,6 +18,16 @@ export default function AudioPlayer({ src, className = '', style, hideControls =
   const [duration, setDuration] = useState(0)
   const [volume, setVolume] = useState(1)
   const [rate, setRate] = useState(1)
+  const [isLightTheme, setIsLightTheme] = useState(false)
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)')
+    setIsLightTheme(mediaQuery.matches)
+    
+    const handleChange = (e) => setIsLightTheme(e.matches)
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -89,7 +99,9 @@ export default function AudioPlayer({ src, className = '', style, hideControls =
           value={currentTime}
           onChange={onSeek}
           style={{
-            background: `linear-gradient(90deg, #4472cf 0%, #67e6cd ${progressPercent}%, rgba(255,255,255,0.2) ${progressPercent}%, rgba(255,255,255,0.2) 100%)`,
+            background: isLightTheme
+              ? `linear-gradient(90deg, #4472cf 0%, #67e6cd ${progressPercent}%, rgba(0,0,0,0.1) ${progressPercent}%, rgba(0,0,0,0.1) 100%)`
+              : `linear-gradient(90deg, #4472cf 0%, #67e6cd ${progressPercent}%, rgba(255,255,255,0.2) ${progressPercent}%, rgba(255,255,255,0.2) 100%)`,
           }}
           aria-label="Seek"
         />

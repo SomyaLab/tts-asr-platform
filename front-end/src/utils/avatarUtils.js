@@ -1,9 +1,15 @@
 /**
  * Generate unique avatar URL for a user based on their ID or email
  * Uses UI Avatars service to generate avatar with initials
+ * Prioritizes Google profile picture if available
  */
 export function getUserAvatarUrl(user) {
   if (!user) return '/male.png' // Fallback to default
+  
+  // If user has an avatar URL (from Google OAuth or uploaded), use it
+  if (user.avatarUrl) {
+    return user.avatarUrl
+  }
   
   // Use user ID or email to generate consistent avatar
   const identifier = user.id || user.email || 'user'

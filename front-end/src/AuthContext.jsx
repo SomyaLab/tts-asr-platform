@@ -8,11 +8,11 @@ export function AuthProvider({ children }) {
   const [authError, setAuthError] = useState(null)
   const [authMessage, setAuthMessage] = useState(null)
 
-  // Handle email confirmation callback from URL hash
+  // Handle email confirmation and OAuth callbacks from URL hash
   useEffect(() => {
     if (!isSupabaseConfigured() || !supabase) return
 
-    const handleEmailConfirmation = async () => {
+    const handleAuthCallback = async () => {
       const hashParams = new URLSearchParams(window.location.hash.substring(1))
       const accessToken = hashParams.get('access_token')
       const refreshToken = hashParams.get('refresh_token')
@@ -21,20 +21,22 @@ export function AuthProvider({ children }) {
       const errorDescription = hashParams.get('error_description')
       const type = hashParams.get('type')
 
-      // Check if this is an email confirmation callback
-      if (type === 'recovery' || type === 'signup' || accessToken || error) {
+      // Check if this is an auth callback (email confirmation or OAuth)
+      if (type === 'recovery' || type === 'signup' || type === 'oauth' || accessToken || error) {
         if (error || errorCode) {
-          // Handle error cases (expired OTP, invalid link, etc.)
-          const isExpired = errorCode === 'otp_expired' || 
-                           error === 'access_denied' && (errorDescription?.includes('expired') || errorDescription?.includes('Expired'))
+          // Handle error cases
+          let errorMessage = errorDescription || 'An authentication error occurred.'
           
-          if (isExpired) {
-            setAuthError('This confirmation link has expired. Please request a new confirmation email.')
+          if (error === 'requested path is invalid') {
+            errorMessage = 'Invalid redirect URL. Please check your Supabase configuration.'
+          } else if (errorCode === 'otp_expired' || 
+                     (error === 'access_denied' && errorDescription?.includes('expired'))) {
+            errorMessage = 'This confirmation link has expired. Please request a new confirmation email.'
           } else if (error === 'access_denied') {
-            setAuthError(errorDescription || 'This confirmation link is invalid or has expired.')
-          } else {
-            setAuthError(errorDescription || 'An error occurred during email confirmation.')
+            errorMessage = errorDescription || 'Access denied. This link is invalid or has expired.'
           }
+          
+          setAuthError(errorMessage)
           
           // Clear URL hash after processing error
           window.history.replaceState(null, '', window.location.pathname + window.location.search)
@@ -50,13 +52,17 @@ export function AuthProvider({ children }) {
             })
 
             if (sessionError) {
-              setAuthError('Failed to confirm email. Please try again.')
+              setAuthError('Failed to complete authentication. Please try again.')
               window.history.replaceState(null, '', window.location.pathname + window.location.search)
               return
             }
 
             if (data?.session?.user) {
-              setAuthMessage('Email confirmed successfully! You are now signed in.')
+              if (type === 'oauth') {
+                setAuthMessage('Successfully signed in with Google!')
+              } else {
+                setAuthMessage('Email confirmed successfully! You are now signed in.')
+              }
               // Clear URL hash after successful confirmation
               window.history.replaceState(null, '', window.location.pathname + window.location.search)
               
@@ -66,14 +72,14 @@ export function AuthProvider({ children }) {
               }, 5000)
             }
           } catch (err) {
-            setAuthError('Failed to confirm email. Please try again.')
+            setAuthError('Failed to complete authentication. Please try again.')
             window.history.replaceState(null, '', window.location.pathname + window.location.search)
           }
         }
       }
     }
 
-    handleEmailConfirmation()
+    handleAuthCallback()
   }, [])
 
   // Initialize session and listen for auth changes
@@ -86,9 +92,10 @@ export function AuthProvider({ children }) {
         setUser({
           id: session.user.id,
           email: session.user.email,
-          name: session.user.user_metadata?.name || session.user.email?.split('@')[0],
+          name: session.user.user_metadata?.name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
           phone: session.user.user_metadata?.phone || null,
           provider: session.user.app_metadata?.provider || 'email',
+          avatarUrl: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || null,
           createdAt: session.user.created_at
         })
       }
@@ -100,9 +107,10 @@ export function AuthProvider({ children }) {
         setUser({
           id: session.user.id,
           email: session.user.email,
-          name: session.user.user_metadata?.name || session.user.email?.split('@')[0],
+          name: session.user.user_metadata?.name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
           phone: session.user.user_metadata?.phone || null,
           provider: session.user.app_metadata?.provider || 'email',
+          avatarUrl: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || null,
           createdAt: session.user.created_at
         })
       } else {
@@ -121,9 +129,32 @@ export function AuthProvider({ children }) {
   }, [user])
 
   const signInWithGoogle = async () => {
-    // Mocked sign-in; integrate real OAuth later
-    const name = 'Google User'
-    setUser({ name, provider: 'google' })
+    if (!isSupabaseConfigured()) throw new Error('Supabase is not configured')
+    
+    // Use the current origin without trailing slash for redirect
+    const redirectTo = `${window.location.origin}${window.location.pathname}`
+    
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectTo,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
+      }
+    })
+    
+    if (error) {
+      // Provide more helpful error messages
+      if (error.message?.includes('requested path is invalid')) {
+        throw new Error('Invalid redirect URL. Please configure the redirect URL in your Supabase dashboard under Authentication > URL Configuration.')
+      }
+      throw error
+    }
+    
+    // Note: User will be set via onAuthStateChange after OAuth redirect
+    // The redirect happens automatically, so we don't need to do anything else here
   }
 
   const signInWithApple = async () => {

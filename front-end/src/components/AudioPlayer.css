@@ -10,6 +10,13 @@
 .ap-btn--icon:focus-visible { outline: none; box-shadow: none; }
 .ap-btn--icon::-moz-focus-inner { border: 0; }
 .ap-seek { flex: 1; appearance: none; height: 30px; border-radius: 8px; background: rgba(255,255,255,0.2); }
+
+@media (prefers-color-scheme: light) {
+  .hero .ap-seek,
+  .demo-card .ap-seek {
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
 .ap-seek::-webkit-slider-thumb { appearance: none; width: 0; height: 0; background: transparent; border: none; }
 .ap-seek::-moz-range-thumb { width: 0; height: 0; border: none; background: transparent; }
 .ap-time { font-size: 12px; color: #cbd5e1; }
@@ -17,6 +24,29 @@
 .ap-chip { border-radius: 9999px; padding: 6px 10px; border: 1px solid #2563eb; background: transparent; color: #e5e7eb; }
 .ap-vol { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .ap-vol-range { width: 160px; }
-.ap-vol-icon { font-size: 16px; }
+.ap-vol-icon { font-size: 16px; color: #e5e7eb; }
+
+@media (prefers-color-scheme: light) {
+  .hero .ap-btn--icon,
+  .demo-card .ap-btn--icon { 
+    color: #000000 !important; 
+  }
+  .hero .ap-row,
+  .demo-card .ap-row { 
+    color: #000000; 
+  }
+  .hero .ap-time,
+  .demo-card .ap-time { 
+    color: #374151; 
+  }
+  .hero .ap-chip,
+  .demo-card .ap-chip { 
+    color: #000000; 
+  }
+  .hero .ap-vol-icon,
+  .demo-card .ap-vol-icon { 
+    color: #000000; 
+  }
+}
 
 

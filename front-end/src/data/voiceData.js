@@ -277,6 +277,12 @@ export const LANGUAGE_NAMES = {
   kn: 'Kannada',
   te: 'Telugu',
   mr: 'Marathi',
-  sa: 'Sanskrit'
+  sa: 'Sanskrit',
+  bn: 'Bengali',
+  bh: 'Bhojpuri',
+  mh: 'Maithili',
+  mg: 'Magahi',
+  ch: 'Chhattisgarhi',
+  gu: 'Gujarati'
 }
 

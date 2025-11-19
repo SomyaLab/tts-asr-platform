@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import './NavBar.css'
 import AuthModal from './AuthModal.jsx'
 import { useAuth } from '../AuthContext.jsx'
@@ -8,8 +8,10 @@ import { IoMenu } from 'react-icons/io5'
 export default function NavBar() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
   const [onLight, setOnLight] = useState(false)
+  const isHomePage = location.pathname === '/'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10)
@@ -29,8 +31,12 @@ export default function NavBar() {
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  // Detect when nav sits over a light (white) section like #blog
+  // Detect when nav sits over a light (white) section like #blog (only if not on home page)
   useEffect(() => {
+    if (isHomePage) {
+      setOnLight(false)
+      return
+    }
     function updateTheme() {
       const blog = document.getElementById('blog')
       const nav = document.querySelector('.site-nav')
@@ -49,7 +55,7 @@ export default function NavBar() {
       window.removeEventListener('scroll', updateTheme)
       window.removeEventListener('resize', updateTheme)
     }
-  }, [])
+  }, [isHomePage])
 
   const [authOpen, setAuthOpen] = useState(false)
   const shouldNavigateAfterLogin = useRef(false)
@@ -79,7 +85,7 @@ export default function NavBar() {
 
   return (
     <>
-    <header className={`site-nav ${scrolled ? 'is-scrolled' : ''} ${menuOpen ? 'menu-open' : ''} ${onLight ? 'on-light' : ''}`}>
+    <header className={`site-nav ${scrolled ? 'is-scrolled' : ''} ${menuOpen ? 'menu-open' : ''} ${onLight ? 'on-light' : ''} ${isHomePage ? 'on-home' : ''}`}>
       <div className="header-inner">
         <div className="nav-glass">
           <div className="site-brand">
