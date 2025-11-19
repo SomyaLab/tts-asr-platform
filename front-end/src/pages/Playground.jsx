@@ -14,7 +14,9 @@ import { LiaDownloadSolid } from 'react-icons/lia'
 import AudioPlayer from '../components/AudioPlayer.jsx'
 import { getAllVoices } from '../data/voiceData.js'
 import AccountModal from '../components/AccountModal.jsx'
+import TutorialModal from '../components/TutorialModal.jsx'
 import { getUserAvatarUrl } from '../utils/avatarUtils.js'
+import { BsQuestion } from 'react-icons/bs'
 
 export default function Playground() {
   const { user, signOut } = useAuth()
@@ -69,6 +71,7 @@ export default function Playground() {
   const [clonePreviewLanguage, setClonePreviewLanguage] = useState('')
   const [clonePreviewAudio, setClonePreviewAudio] = useState(null)
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
+  const [showTutorial, setShowTutorial] = useState(false)
   // Fix API base URL - remove trailing /api if present to avoid double /api/api
   // Note: 0.0.0.0 is not accessible from browsers, use localhost or actual hostname
   // When accessed through a domain (like somya.ai), use relative path
@@ -90,6 +93,15 @@ export default function Playground() {
     setTheme(savedTheme)
     document.documentElement.setAttribute('data-theme', savedTheme)
     
+    // Check if tutorial should be shown (only for first-time users and in text-to-speech view)
+    const tutorialCompleted = localStorage.getItem('playground_tutorial_completed')
+    if (!tutorialCompleted && user && activeView === 'text-to-speech') {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        setShowTutorial(true)
+      }, 500)
+    }
+    
     // Set sidebar to collapsed by default on mobile
     const checkMobile = () => {
       const mobile = window.innerWidth <= 900
@@ -106,7 +118,7 @@ export default function Playground() {
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+  }, [user, activeView])
 
   // Handle URL parameter for view selection
   useEffect(() => {
@@ -612,6 +624,7 @@ export default function Playground() {
               className="navbar-btn menu-btn" 
               onClick={() => setSidebarOpen(!sidebarOpen)}
               title="Toggle Menu"
+              data-tutorial-highlight="menu-btn"
             >
               {(sidebarOpen && isSmallScreen) ? <IoClose /> : <IoMenuOutline />}
             </button>
@@ -620,11 +633,20 @@ export default function Playground() {
             </Link>
           </div>
           <div className="navbar-right">
+            <button 
+              className="navbar-btn tutorial-btn" 
+              onClick={() => setShowTutorial(true)}
+              title="Show Tutorial"
+              data-tutorial-highlight="navbar-right"
+            >
+              <BsQuestion />
+            </button>
             <div className="theme-toggle-container">
               <button 
                 className={`theme-toggle-switch ${theme === 'dark' ? 'dark-active' : 'light-active'}`}
                 onClick={toggleTheme}
                 title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+                data-tutorial-highlight="navbar-right"
               >
                 <div className="toggle-track">
                   <div className="toggle-thumb">
@@ -638,6 +660,7 @@ export default function Playground() {
                 className="navbar-btn user-btn" 
                 onClick={() => setShowAccountModal(true)}
                 title={user.name || user.email}
+                data-tutorial-highlight="navbar-right"
               >
                 <img 
                   src={getUserAvatarUrl(user)} 
@@ -662,7 +685,10 @@ export default function Playground() {
         )}
         
         {/* Left Sidebar */}
-        <aside className={`playground-sidebar-left ${sidebarOpen ? 'open' : 'closed'}`}>
+        <aside 
+          className={`playground-sidebar-left ${sidebarOpen ? 'open' : 'closed'}`}
+          data-tutorial-highlight="sidebar-left"
+        >
           
 
           <nav className="sidebar-nav">
@@ -748,6 +774,7 @@ export default function Playground() {
                   className="dots-btn"
                   onClick={() => setShowControlCard(!showControlCard)}
                   title="Control Options"
+                  data-tutorial-highlight="control-card"
                 >
                   <BsThreeDotsVertical />
                 </button>
@@ -760,6 +787,7 @@ export default function Playground() {
                   value={textToSpeak}
                   onChange={(e) => setTextToSpeak(e.target.value)}
                   rows={8}
+                  data-tutorial-highlight="text-input"
                 />
               </div>
 
@@ -791,6 +819,7 @@ export default function Playground() {
                     className="speak-btn"
                     onClick={handleSpeak}
                     disabled={isSending || !textToSpeak.trim() || !ttsLanguage}
+                    data-tutorial-highlight="speak-button"
                   >
                     <FaPlay />
                     Speak
@@ -892,7 +921,10 @@ export default function Playground() {
             </main>
 
             {/* Right Sidebar */}
-            <aside className="playground-sidebar-right">
+            <aside 
+              className="playground-sidebar-right"
+              data-tutorial-highlight="sidebar-right"
+            >
           
 
           <div className="sidebar-tabs">
@@ -1604,6 +1636,13 @@ export default function Playground() {
       <AccountModal 
         isOpen={showAccountModal} 
         onClose={() => setShowAccountModal(false)} 
+      />
+
+      {/* Tutorial Modal */}
+      <TutorialModal 
+        isOpen={showTutorial} 
+        onClose={() => setShowTutorial(false)}
+        activeView={activeView}
       />
     </div>
   )

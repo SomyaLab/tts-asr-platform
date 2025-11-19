@@ -1,0 +1,380 @@
+/* Tutorial Overlay */
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+.tutorial-overlay.tutorial-blur-rest {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.tutorial-overlay.tutorial-blur-rest .tutorial-highlight {
+  z-index: 10001;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Tutorial Highlight */
+.tutorial-highlight {
+  position: fixed;
+  border: 3px solid #3b82f6;
+  border-radius: 12px;
+  box-shadow: 
+    0 0 0 9999px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(59, 130, 246, 0.6),
+    inset 0 0 20px rgba(59, 130, 246, 0.2);
+  pointer-events: none;
+  z-index: 10001;
+  animation: highlightPulse 2s ease-in-out infinite;
+  transition: all 0.3s ease;
+}
+
+.tutorial-blur-rest .tutorial-highlight {
+  box-shadow: 
+    0 0 0 9999px rgba(0, 0, 0, 0.7),
+    0 0 30px rgba(59, 130, 246, 0.8),
+    inset 0 0 30px rgba(59, 130, 246, 0.3);
+  filter: brightness(1.1);
+}
+
+@keyframes highlightPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 9999px rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(59, 130, 246, 0.6),
+      inset 0 0 20px rgba(59, 130, 246, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 9999px rgba(0, 0, 0, 0.5),
+      0 0 30px rgba(59, 130, 246, 0.8),
+      inset 0 0 30px rgba(59, 130, 246, 0.3);
+  }
+}
+
+/* Tutorial Card */
+.tutorial-card {
+  position: fixed;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  backdrop-filter: blur(var(--card-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--card-blur)) saturate(180%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  width: 90%;
+  max-width: 380px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  z-index: 10002;
+  animation: slideUp 0.3s ease;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+:root[data-theme="dark"] .tutorial-card {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.95) 0%,
+    rgba(15, 23, 42, 0.9) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card Position Variants */
+.tutorial-card-center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.tutorial-card-left {
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+}
+
+.tutorial-card-right {
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+}
+
+.tutorial-card-top {
+  top: 80px;
+  left: 16px;
+}
+
+.tutorial-card-top-right {
+  top: 80px;
+  right: 16px;
+}
+
+.tutorial-card-bottom {
+  bottom: 16px;
+  left: 16px;
+}
+
+/* Progress Bar */
+.tutorial-progress-container {
+  width: 100%;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+:root[data-theme="dark"] .tutorial-progress-container {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tutorial-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+/* Header */
+.tutorial-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tutorial-step-indicator {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tutorial-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.tutorial-close-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .tutorial-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Content */
+.tutorial-content {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.tutorial-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 10px 0;
+  transition: color 0.3s ease;
+}
+
+.tutorial-description {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+/* Footer */
+.tutorial-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-top: 1px solid var(--border-color);
+  gap: 16px;
+}
+
+.tutorial-skip-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.tutorial-skip-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-secondary);
+}
+
+:root[data-theme="dark"] .tutorial-skip-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tutorial-nav-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.tutorial-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.tutorial-nav-btn-prev {
+  background: var(--slider-track-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.tutorial-nav-btn-prev:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: var(--text-tertiary);
+}
+
+:root[data-theme="dark"] .tutorial-nav-btn-prev:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tutorial-nav-btn-prev:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tutorial-nav-btn-next {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.tutorial-nav-btn-next:hover {
+  background: #2563eb;
+}
+
+.tutorial-nav-btn svg {
+  font-size: 18px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tutorial-card {
+    width: 95%;
+    max-width: none;
+    max-height: 85vh;
+  }
+
+  .tutorial-card-left,
+  .tutorial-card-right,
+  .tutorial-card-top-right {
+    top: 50%;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+  }
+
+  .tutorial-card-bottom {
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    transform: none;
+    width: auto;
+  }
+
+  .tutorial-content {
+    padding: 20px;
+  }
+
+  .tutorial-title {
+    font-size: 20px;
+  }
+
+  .tutorial-description {
+    font-size: 14px;
+  }
+
+  .tutorial-footer {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tutorial-skip-btn {
+    order: 2;
+    width: 100%;
+    text-align: center;
+  }
+
+  .tutorial-nav-buttons {
+    width: 100%;
+    order: 1;
+  }
+
+  .tutorial-nav-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
