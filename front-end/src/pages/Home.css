@@ -261,9 +261,16 @@
 }
 
 .tts-select {
-  background: #ffffff;
-  color: #000000;
-  border: 1px solid rgba(96,165,250,0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.3) 0%,
+    rgba(15, 23, 42, 0.25) 50%,
+    rgba(30, 41, 59, 0.2) 100%
+  );
+  backdrop-filter: blur(var(--card-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--card-blur)) saturate(180%);
+  border: 1px solid var(--card-border);
+  color: #e5e7eb;
   border-radius: 8px;
   padding: 8px 10px;
   min-width: 32px;
@@ -278,11 +285,99 @@
   padding-right: 12px;
   outline: none;
   text-align: center;
-  transition: background-color 0.2s ease;
-
+  transition: all 0.2s ease;
+  box-shadow: 
+    var(--card-shadow-outer-1),
+    var(--card-shadow-outer-2),
+    var(--card-shadow-inset-top),
+    var(--card-shadow-inset-bottom); 
 }
 
-.tts-select::-ms-expand { display: flex; background: #ffffff; }
+.tts-select:focus {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.4) 0%,
+    rgba(15, 23, 42, 0.35) 50%,
+    rgba(30, 41, 59, 0.3) 100%
+  );
+}
+
+@media (prefers-color-scheme: light) {
+  .tts-select {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    backdrop-filter: blur(var(--card-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(180%);
+    border: 1px solid var(--card-border);
+    color: #000000;
+  }
+  .tts-select:focus {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0.25) 50%,
+      rgba(255, 255, 255, 0.2) 100%
+    );
+  }
+}
+
+.tts-select option {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.95) 0%,
+    rgba(15, 23, 42, 0.9) 50%,
+    rgba(30, 41, 59, 0.95) 100%
+  );
+  color: #e5e7eb;
+  padding: 8px 10px;
+}
+
+.tts-select option:checked,
+.tts-select option:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 1) 0%,
+    rgba(15, 23, 42, 0.95) 50%,
+    rgba(30, 41, 59, 1) 100%
+  );
+  color: #ffffff;
+}
+
+@media (prefers-color-scheme: light) {
+  .tts-select option {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.9) 50%,
+      rgba(255, 255, 255, 0.95) 100%
+    );
+    color: #000000;
+  }
+  .tts-select option:checked,
+  .tts-select option:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 0.95) 50%,
+      rgba(255, 255, 255, 1) 100%
+    );
+    color: #000000;
+  }
+}
+
+.tts-select::-ms-expand { 
+  display: flex; 
+  background: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.3) 0%,
+    rgba(15, 23, 42, 0.25) 50%,
+    rgba(30, 41, 59, 0.2) 100%
+  );
+}
 
 .transcribe-btn-home {
   padding: 8px 16px;
