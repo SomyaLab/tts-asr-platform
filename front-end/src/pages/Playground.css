@@ -2504,14 +2504,22 @@
 
   .mic-card {
     order: 1;
+    max-width: 100%;
   }
 
   .upload-card {
     order: 2;
+    max-width: 100%;
+  }
+
+  .speech-to-text-audio-section {
+    order: 3;
+    min-width: auto;
+    width: 100%;
   }
 
   .text-card {
-    order: 3;
+    order: 4;
   }
 
   .speech-to-text-card {
@@ -2729,22 +2737,25 @@
 
 .speech-to-text-top-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: auto auto 1fr;
   gap: 24px;
+  align-items: start;
 }
 
 .speech-to-text-audio-section {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  align-items: center;
-  padding: 24px;
+  align-items: stretch;
+  padding: 20px;
   background: var(--slider-track-bg);
   border: 1px solid var(--border-color);
   border-radius: 16px;
   box-shadow: 
     inset 0 1px 2px rgba(0, 0, 0, 0.05),
     0 1px 0 rgba(255, 255, 255, 0.9);
+  min-width: 300px;
+  flex: 1;
 }
 
 :root[data-theme="dark"] .speech-to-text-audio-section {
@@ -2761,8 +2772,8 @@
 }
 
 .speech-to-text-audio-section .transcribe-btn {
-  width: auto;
-  max-width: 300px;
+  width: 100%;
+  max-width: none;
 }
 
 .speech-to-text-card {
@@ -2785,7 +2796,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
+  min-height: auto;
+  max-width: 280px;
   position: relative;
 }
 
@@ -2802,14 +2814,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 200px;
-  height: 200px;
+  width: 120px;
+  height: 120px;
 }
 
 .mic-ring {
   position: relative;
-  width: 180px;
-  height: 180px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -2866,8 +2878,8 @@
 }
 
 .mic-icon-wrapper {
-  width: 120px;
-  height: 120px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -2882,7 +2894,7 @@
 }
 
 .mic-icon {
-  font-size: 48px;
+  font-size: 28px;
   color: var(--text-primary);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
@@ -2893,16 +2905,16 @@
 }
 
 .mic-card-title {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
 }
 
 .mic-card-subtitle {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--text-tertiary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
 }
 
 .mic-controls {
@@ -2916,14 +2928,14 @@
   background: #3b82f6;
   border: none;
   color: #ffffff;
-  padding: 12px 24px;
+  padding: 8px 16px;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   transition: background-color 0.2s;
 }
 
@@ -2981,18 +2993,24 @@
 .upload-card {
   display: flex;
   flex-direction: column;
-  min-height: 400px;
+  min-height: auto;
+  max-width: 280px;
 }
 
 .upload-card-header {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .upload-folder-icon {
   flex-shrink: 0;
+}
+
+.upload-folder-icon svg {
+  width: 36px;
+  height: 36px;
 }
 
 .upload-card-header-text {
@@ -3000,14 +3018,14 @@
 }
 
 .upload-card-title {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   color: var(--text-primary);
   margin: 0 0 4px 0;
 }
 
 .upload-card-subtitle {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--text-tertiary);
   margin: 0;
 }
@@ -3018,14 +3036,15 @@
   background: rgba(0, 0, 0, 0.03);
   border: 2px dashed var(--border-color);
   border-radius: 12px;
-  padding: 48px 24px;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   text-align: center;
   transition: all 0.3s ease;
+  min-height: 180px;
 }
 
 :root[data-theme="dark"] .upload-card-dropzone {

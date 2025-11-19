@@ -1,4 +1,12 @@
-.ap-root { border-radius: 12px; padding: 14px; background: rgba(255, 255, 255, 0.007); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); width: 100%; height: auto; box-sizing: border-box; }
+.ap-root { border-radius: 12px; padding: 14px; background: rgba(255, 255, 255, 0.007); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); width: 100%; height: auto; box-sizing: border-box; min-height: fit-content; }
+.ap-language-selector { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.ap-language-label { font-size: 13px; font-weight: 500; color: var(--text-secondary, #e5e7eb); }
+.ap-language-select { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color, rgba(255, 255, 255, 0.2)); background: var(--bg-card, rgba(255, 255, 255, 0.05)); color: var(--text-primary, #e5e7eb); font-size: 13px; cursor: pointer; transition: all 0.2s ease; width: 100%; }
+.ap-language-select:hover { border-color: rgba(59, 130, 246, 0.5); background: rgba(59, 130, 246, 0.05); }
+.ap-language-select:focus { outline: none; border-color: rgba(59, 130, 246, 0.8); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1); }
+:root[data-theme="light"] .ap-language-label { color: #374151; }
+:root[data-theme="light"] .ap-language-select { background: rgba(255, 255, 255, 0.9); color: #111827; border-color: rgba(0, 0, 0, 0.2); }
+:root[data-theme="dark"] .ap-language-select { background: rgba(255, 255, 255, 0.05); color: #e5e7eb; border-color: rgba(255, 255, 255, 0.2); }
 .ap-row { display: flex; align-items: center; gap: 12px; color: #e5e7eb; }
 .ap-btn--icon { background: transparent; border: none; color: #ffffff; width: 38px; height: 38px; padding: 0; margin: 0; transition: color 0.3s ease; }
 :root[data-theme="light"] .ap-btn--icon { color: #000000; }

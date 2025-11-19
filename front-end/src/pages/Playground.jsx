@@ -1088,34 +1088,11 @@ export default function Playground() {
           <div className="speech-to-text-container">
             <div className="speech-to-text-header">
               <h1 className="speech-to-text-title">Speech to Text</h1>
-              <div className="speech-to-text-language-selector">
-                <label className="speech-to-text-language-label">Language:</label>
-                <select
-                  className="speech-to-text-language-select"
-                  value={asrLanguage}
-                  onChange={(e) => setAsrLanguage(e.target.value)}
-                  required
-                >
-                  <option value="" disabled>Select language</option>
-                  <option value="en">English</option>
-                  <option value="hi">Hindi</option>
-                  <option value="kn">Kannada</option>
-                  <option value="te">Telugu</option>
-                  <option value="mr">Marathi</option>
-                  <option value="sa">Sanskrit</option>
-                  <option value="bn">Bengali</option>
-                  <option value="bh">Bhojpuri</option>
-                  <option value="mh">Maithili</option>
-                  <option value="mg">Magahi</option>
-                  <option value="ch">Chhattisgarhi</option>
-                  <option value="gu">Gujarati</option>
-                </select>
-              </div>
             </div>
 
             {/* Three Card Layout */}
             <div className="speech-to-text-layout">
-              {/* Top Row: Mic Recording and Upload Cards */}
+              {/* Top Row: Mic Recording, Upload Cards, and Audio Player */}
               <div className="speech-to-text-top-row">
                 {/* Mic Recording Card */}
                 <div className="speech-to-text-card mic-card">
@@ -1233,51 +1210,67 @@ export default function Playground() {
                     )}
                   </div>
                 </div>
-              </div>
 
-              {/* Audio Player Section */}
-              {recordedUrl && (
+                {/* Audio Player Section */}
                 <div className="speech-to-text-audio-section">
                   <div className="audio-preview-section">
-                    <AudioPlayer src={recordedUrl} hideControls={true} />
+                    {recordedUrl ? (
+                      <AudioPlayer 
+                        src={recordedUrl} 
+                        hideControls={true}
+                        showLanguage={true}
+                        language={asrLanguage}
+                        onLanguageChange={setAsrLanguage}
+                      />
+                    ) : (
+                      <AudioPlayer 
+                        src={null}
+                        hideControls={true}
+                        showLanguage={true}
+                        language={asrLanguage}
+                        onLanguageChange={setAsrLanguage}
+                      />
+                    )}
                   </div>
-                  <button 
-                    className="transcribe-btn"
-                    onClick={async () => {
-                      if (!asrLanguage) {
-                        alert('Please select a language first')
-                        return
-                      }
-                      if (recordedBlob) {
-                        setIsTranscribing(true)
-                        try {
-                          const formData = new FormData()
-                          formData.append('audio', recordedBlob)
-                          formData.append('language', asrLanguage)
-                          const response = await fetch(`${API_BASE}/api/v1/asr`, {
-                            method: 'POST',
-                            body: formData
-                          })
-                          if (response.ok) {
-                            const data = await response.json()
-                            setTranscribedText(data.text || data.transcript || '')
-                          } else {
-                            alert('Failed to transcribe audio')
-                          }
-                        } catch (error) {
-                          console.error('Transcription error:', error)
-                          alert('Failed to transcribe audio')
-                        } finally {
-                          setIsTranscribing(false)
+                  {recordedUrl && (
+                    <button 
+                      className="transcribe-btn"
+                      onClick={async () => {
+                        if (!asrLanguage) {
+                          alert('Please select a language first')
+                          return
                         }
-                      }
-                    }}
-                    disabled={isTranscribing || !asrLanguage}
-                  >
-                    {isTranscribing ? 'Transcribing...' : 'Transcribe'}
-                  </button>
+                        if (recordedBlob) {
+                          setIsTranscribing(true)
+                          try {
+                            const formData = new FormData()
+                            formData.append('audio', recordedBlob)
+                            formData.append('language', asrLanguage)
+                            const response = await fetch(`${API_BASE}/api/v1/asr`, {
+                              method: 'POST',
+                              body: formData
+                            })
+                            if (response.ok) {
+                              const data = await response.json()
+                              setTranscribedText(data.text || data.transcript || '')
+                            } else {
+                              alert('Failed to transcribe audio')
+                            }
+                          } catch (error) {
+                            console.error('Transcription error:', error)
+                            alert('Failed to transcribe audio')
+                          } finally {
+                            setIsTranscribing(false)
+                          }
+                        }
+                      }}
+                      disabled={isTranscribing || !asrLanguage}
+                    >
+                      {isTranscribing ? 'Transcribing...' : 'Transcribe'}
+                    </button>
+                  )}
                 </div>
-              )}
+              </div>
 
               {/* Bottom Row: Text Box Card */}
               <div className="speech-to-text-card text-card">

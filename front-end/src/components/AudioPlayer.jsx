@@ -10,7 +10,7 @@ function formatTime(totalSeconds) {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
-export default function AudioPlayer({ src, className = '', style, hideControls = false }) {
+export default function AudioPlayer({ src, className = '', style, hideControls = false, showLanguage = false, language = '', onLanguageChange = null }) {
   const audioRef = useRef(null)
   const progressRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -84,47 +84,76 @@ export default function AudioPlayer({ src, className = '', style, hideControls =
 
   return (
     <div className={`ap-root ${className}`} style={style}>
-      <audio ref={audioRef} src={src} preload="metadata" />
-      <div className="ap-row">
-        <button className="ap-btn--icon" onClick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
-          {isPlaying ? <HiMiniPause size={22} /> : <RiPlayLargeLine size={24} />}
-        </button>
-        <input
-          ref={progressRef}
-          className="ap-seek"
-          type="range"
-          min={0}
-          max={duration || 0}
-          step={0.01}
-          value={currentTime}
-          onChange={onSeek}
-          style={{
-            background: isLightTheme
-              ? `linear-gradient(90deg, #4472cf 0%, #67e6cd ${progressPercent}%, rgba(0,0,0,0.1) ${progressPercent}%, rgba(0,0,0,0.1) 100%)`
-              : `linear-gradient(90deg, #4472cf 0%, #67e6cd ${progressPercent}%, rgba(255,255,255,0.2) ${progressPercent}%, rgba(255,255,255,0.2) 100%)`,
-          }}
-          aria-label="Seek"
-        />
-        <span className="ap-time">{formatTime(currentTime)} / {formatTime(duration)}</span>
-      </div>
-
-      {!hideControls && (
-        <div className="ap-row ap-controls">
-          <button className="ap-chip" onClick={toggleRate}>{rate}x</button>
-          <div className="ap-vol">
-            <span className="ap-vol-icon"><HiSpeakerWave size={16} /></span>
+      {src && <audio ref={audioRef} src={src} preload="metadata" />}
+      {showLanguage && (
+        <div className="ap-language-selector">
+          <label className="ap-language-label">Language:</label>
+          <select
+            className="ap-language-select"
+            value={language}
+            onChange={(e) => onLanguageChange && onLanguageChange(e.target.value)}
+            required
+          >
+            <option value="" disabled>Select language</option>
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="kn">Kannada</option>
+            <option value="te">Telugu</option>
+            <option value="mr">Marathi</option>
+            <option value="sa">Sanskrit</option>
+            <option value="bn">Bengali</option>
+            <option value="bh">Bhojpuri</option>
+            <option value="mh">Maithili</option>
+            <option value="mg">Magahi</option>
+            <option value="ch">Chhattisgarhi</option>
+            <option value="gu">Gujarati</option>
+          </select>
+        </div>
+      )}
+      {src && (
+        <>
+          <div className="ap-row">
+            <button className="ap-btn--icon" onClick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
+              {isPlaying ? <HiMiniPause size={22} /> : <RiPlayLargeLine size={24} />}
+            </button>
             <input
-              className="ap-vol-range"
+              ref={progressRef}
+              className="ap-seek"
               type="range"
               min={0}
-              max={1}
+              max={duration || 0}
               step={0.01}
-              value={volume}
-              onChange={(e) => setVolume(Number(e.target.value))}
-              aria-label="Volume"
+              value={currentTime}
+              onChange={onSeek}
+              style={{
+                background: isLightTheme
+                  ? `linear-gradient(90deg, #4472cf 0%, #67e6cd ${progressPercent}%, rgba(0,0,0,0.1) ${progressPercent}%, rgba(0,0,0,0.1) 100%)`
+                  : `linear-gradient(90deg, #4472cf 0%, #67e6cd ${progressPercent}%, rgba(255,255,255,0.2) ${progressPercent}%, rgba(255,255,255,0.2) 100%)`,
+              }}
+              aria-label="Seek"
             />
+            <span className="ap-time">{formatTime(currentTime)} / {formatTime(duration)}</span>
           </div>
-        </div>
+
+          {!hideControls && (
+            <div className="ap-row ap-controls">
+              <button className="ap-chip" onClick={toggleRate}>{rate}x</button>
+              <div className="ap-vol">
+                <span className="ap-vol-icon"><HiSpeakerWave size={16} /></span>
+                <input
+                  className="ap-vol-range"
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={volume}
+                  onChange={(e) => setVolume(Number(e.target.value))}
+                  aria-label="Volume"
+                />
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

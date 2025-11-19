@@ -89,8 +89,10 @@ export default function TutorialModal({ isOpen, onClose, activeView = 'text-to-s
   useEffect(() => {
     if (isOpen) {
       setCurrentStep(0)
+      setHighlightPosition(null)
+      setCardPosition({ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' })
     }
-  }, [isOpen, isMobile])
+  }, [isOpen])
 
   // Update highlight position and card position when step changes
   useEffect(() => {
