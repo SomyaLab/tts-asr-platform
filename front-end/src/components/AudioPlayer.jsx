@@ -10,7 +10,7 @@ function formatTime(totalSeconds) {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
-export default function AudioPlayer({ src, className = '', style, hideControls = false, showLanguage = false, language = '', onLanguageChange = null }) {
+export default function AudioPlayer({ src, className = '', style, hideControls = false, showLanguage = false, language = '', onLanguageChange = null, theme = 'dark' }) {
   const audioRef = useRef(null)
   const progressRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -18,34 +18,42 @@ export default function AudioPlayer({ src, className = '', style, hideControls =
   const [duration, setDuration] = useState(0)
   const [volume, setVolume] = useState(1)
   const [rate, setRate] = useState(1)
-  const [isLightTheme, setIsLightTheme] = useState(false)
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)')
-    setIsLightTheme(mediaQuery.matches)
-    
-    const handleChange = (e) => setIsLightTheme(e.matches)
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [])
+  
+  // Determine if light theme is active based on prop or system preference
+  const isLightTheme = theme === 'light';
 
   useEffect(() => {
     const audio = audioRef.current
-    if (!audio) return
+    if (!audio || !src) {
+      setCurrentTime(0)
+      setDuration(0)
+      setIsPlaying(false)
+      return
+    }
 
     const onLoaded = () => setDuration(audio.duration || 0)
     const onTime = () => setCurrentTime(audio.currentTime || 0)
     const onEnd = () => setIsPlaying(false)
+    const onPlay = () => setIsPlaying(true)
+    const onPause = () => setIsPlaying(false)
 
     audio.addEventListener('loadedmetadata', onLoaded)
     audio.addEventListener('timeupdate', onTime)
     audio.addEventListener('ended', onEnd)
+    audio.addEventListener('play', onPlay)
+    audio.addEventListener('pause', onPause)
+    
+    // Load metadata when src changes
+    audio.load()
+    
     return () => {
       audio.removeEventListener('loadedmetadata', onLoaded)
       audio.removeEventListener('timeupdate', onTime)
       audio.removeEventListener('ended', onEnd)
+      audio.removeEventListener('play', onPlay)
+      audio.removeEventListener('pause', onPause)
     }
-  }, [])
+  }, [src])
 
   useEffect(() => {
     if (audioRef.current) {
@@ -110,51 +118,59 @@ export default function AudioPlayer({ src, className = '', style, hideControls =
           </select>
         </div>
       )}
-      {src && (
-        <>
-          <div className="ap-row">
-            <button className="ap-btn--icon" onClick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
-              {isPlaying ? <HiMiniPause size={22} /> : <RiPlayLargeLine size={24} />}
-            </button>
-            <input
-              ref={progressRef}
-              className="ap-seek"
-              type="range"
-              min={0}
-              max={duration || 0}
-              step={0.01}
-              value={currentTime}
-              onChange={onSeek}
-              style={{
-                background: isLightTheme
-                  ? `linear-gradient(90deg, #4472cf 0%, #67e6cd ${progressPercent}%, rgba(0,0,0,0.1) ${progressPercent}%, rgba(0,0,0,0.1) 100%)`
-                  : `linear-gradient(90deg, #4472cf 0%, #67e6cd ${progressPercent}%, rgba(255,255,255,0.2) ${progressPercent}%, rgba(255,255,255,0.2) 100%)`,
-              }}
-              aria-label="Seek"
-            />
-            <span className="ap-time">{formatTime(currentTime)} / {formatTime(duration)}</span>
-          </div>
+      <div className={`ap-controls-wrapper ${isLightTheme ? 'ap-light' : 'ap-dark'}`}>
+        <div className="ap-row">
+          <button 
+            className="ap-btn--icon" 
+            onClick={togglePlay} 
+            aria-label={isPlaying ? 'Pause' : 'Play'}
+            disabled={!src}
+            style={{ opacity: !src ? 0.5 : 1, cursor: !src ? 'not-allowed' : 'pointer' }}
+          >
+            {isPlaying ? <HiMiniPause size={22} /> : <RiPlayLargeLine size={24} />}
+          </button>
+          <input
+            ref={progressRef}
+            className="ap-seek"
+            type="range"
+            min={0}
+            max={duration || 0}
+            step={0.01}
+            value={currentTime}
+            onChange={onSeek}
+            disabled={!src}
+            style={{
+              background: isLightTheme
+                ? `linear-gradient(90deg, #4472cf 0%, #67e6cd ${progressPercent}%, rgba(0,0,0,0.2) ${progressPercent}%, rgba(0,0,0,0.2) 100%)`
+                : `linear-gradient(90deg, #4472cf 0%, #67e6cd ${progressPercent}%, rgba(255,255,255,0.2) ${progressPercent}%, rgba(255,255,255,0.2) 100%)`,
+              cursor: !src ? 'not-allowed' : 'pointer'
+            }}
+            aria-label="Seek"
+          />
+          <span className="ap-time">{formatTime(currentTime)} / {formatTime(duration)}</span>
+        </div>
 
-          {!hideControls && (
-            <div className="ap-row ap-controls">
-              <button className="ap-chip" onClick={toggleRate}>{rate}x</button>
-              <div className="ap-vol">
-                <span className="ap-vol-icon"><HiSpeakerWave size={16} /></span>
-                <input
-                  className="ap-vol-range"
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={volume}
-                  onChange={(e) => setVolume(Number(e.target.value))}
-                  aria-label="Volume"
-                />
-              </div>
+        {!hideControls && (
+          <div className="ap-row ap-controls">
+            <button className="ap-chip" onClick={toggleRate} disabled={!src} style={{ opacity: !src ? 0.5 : 1 }}>{rate}x</button>
+            <div className="ap-vol">
+              <span className="ap-vol-icon" style={{ opacity: !src ? 0.5 : 1 }}><HiSpeakerWave size={16} /></span>
+              <input
+                className="ap-vol-range"
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={volume}
+                onChange={(e) => setVolume(Number(e.target.value))}
+                aria-label="Volume"
+                disabled={!src}
+                style={{ opacity: !src ? 0.5 : 1, cursor: !src ? 'not-allowed' : 'pointer' }}
+              />
             </div>
-          )}
-        </>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

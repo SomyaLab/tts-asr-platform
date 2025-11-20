@@ -48,6 +48,7 @@ export default function Playground() {
   const [transcribedText, setTranscribedText] = useState('')
   const [isTranscribing, setIsTranscribing] = useState(false)
   const [asrLanguage, setAsrLanguage] = useState('')
+  const [isDragging, setIsDragging] = useState(false)
   const speechToTextFileInputRef = useRef(null)
   const [cloneName, setCloneName] = useState('')
   const [cloneDescription, setCloneDescription] = useState('')
@@ -473,8 +474,7 @@ export default function Playground() {
     setTempControlValue(null)
   }
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0]
+  const handleFileUpload = (file) => {
     if (file && file.type.startsWith('audio/')) {
       setUploadedFile(file)
       const url = URL.createObjectURL(file)
@@ -487,7 +487,37 @@ export default function Playground() {
       }
     } else {
       alert('Please upload an audio file only.')
+    }
+  }
+
+  const handleFileInputChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      handleFileUpload(file)
       e.target.value = ''
+    }
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    
+    const files = e.dataTransfer.files
+    if (files && files.length > 0) {
+      handleFileUpload(files[0])
     }
   }
 
@@ -1145,7 +1175,12 @@ export default function Playground() {
                       <p className="upload-card-subtitle">Select and upload the files of your choice</p>
                     </div>
                   </div>
-                  <div className="upload-card-dropzone">
+                  <div 
+                    className={`upload-card-dropzone ${isDragging ? 'drag-over' : ''}`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
                     {uploadedFile ? (
                       <div className="uploaded-file-display">
                         <div className="uploaded-file-info">
@@ -1188,22 +1223,7 @@ export default function Playground() {
                           ref={speechToTextFileInputRef}
                           type="file"
                           accept="audio/*"
-                          onChange={(e) => {
-                            const file = e.target.files[0]
-                            if (file && file.type.startsWith('audio/')) {
-                              setUploadedFile(file)
-                              const url = URL.createObjectURL(file)
-                              setRecordedUrl(url)
-                              setRecordedBlob(file)
-                              const audio = new Audio(url)
-                              audio.onloadedmetadata = () => {
-                                setRecordingDuration(audio.duration)
-                              }
-                            } else {
-                              alert('Please upload an audio file only.')
-                              e.target.value = ''
-                            }
-                          }}
+                          onChange={handleFileInputChange}
                           style={{ display: 'none' }}
                         />
                       </>
@@ -1217,58 +1237,58 @@ export default function Playground() {
                     {recordedUrl ? (
                       <AudioPlayer 
                         src={recordedUrl} 
-                        hideControls={true}
+                        hideControls={false}
                         showLanguage={true}
                         language={asrLanguage}
                         onLanguageChange={setAsrLanguage}
+                        theme={theme}
                       />
                     ) : (
                       <AudioPlayer 
                         src={null}
-                        hideControls={true}
+                        hideControls={false}
                         showLanguage={true}
                         language={asrLanguage}
                         onLanguageChange={setAsrLanguage}
+                        theme={theme}
                       />
                     )}
                   </div>
-                  {recordedUrl && (
-                    <button 
-                      className="transcribe-btn"
-                      onClick={async () => {
-                        if (!asrLanguage) {
-                          alert('Please select a language first')
-                          return
-                        }
-                        if (recordedBlob) {
-                          setIsTranscribing(true)
-                          try {
-                            const formData = new FormData()
-                            formData.append('audio', recordedBlob)
-                            formData.append('language', asrLanguage)
-                            const response = await fetch(`${API_BASE}/api/v1/asr`, {
-                              method: 'POST',
-                              body: formData
-                            })
-                            if (response.ok) {
-                              const data = await response.json()
-                              setTranscribedText(data.text || data.transcript || '')
-                            } else {
-                              alert('Failed to transcribe audio')
-                            }
-                          } catch (error) {
-                            console.error('Transcription error:', error)
+                  <button 
+                    className="transcribe-btn"
+                    onClick={async () => {
+                      if (!asrLanguage) {
+                        alert('Please select a language first')
+                        return
+                      }
+                      if (recordedBlob) {
+                        setIsTranscribing(true)
+                        try {
+                          const formData = new FormData()
+                          formData.append('audio', recordedBlob)
+                          formData.append('language', asrLanguage)
+                          const response = await fetch(`${API_BASE}/api/v1/asr`, {
+                            method: 'POST',
+                            body: formData
+                          })
+                          if (response.ok) {
+                            const data = await response.json()
+                            setTranscribedText(data.text || data.transcript || '')
+                          } else {
                             alert('Failed to transcribe audio')
-                          } finally {
-                            setIsTranscribing(false)
                           }
+                        } catch (error) {
+                          console.error('Transcription error:', error)
+                          alert('Failed to transcribe audio')
+                        } finally {
+                          setIsTranscribing(false)
                         }
-                      }}
-                      disabled={isTranscribing || !asrLanguage}
-                    >
-                      {isTranscribing ? 'Transcribing...' : 'Transcribe'}
-                    </button>
-                  )}
+                      }
+                    }}
+                    disabled={!recordedUrl || isTranscribing || !asrLanguage}
+                  >
+                    {isTranscribing ? 'Transcribing...' : 'Transcribe'}
+                  </button>
                 </div>
               </div>
 
@@ -1380,7 +1400,7 @@ export default function Playground() {
                       <div className="audio-preview-section">
                         <p className="preview-instruction">Preview your audio recording</p>
                         <div className="audio-player-container">
-                          <AudioPlayer src={recordedUrl} hideControls={true} />
+                          <AudioPlayer src={recordedUrl} hideControls={true} theme={theme} />
                         </div>
                       </div>
                     )}
@@ -1434,7 +1454,7 @@ export default function Playground() {
                             <div className="audio-preview-section">
                               <p className="preview-instruction">Preview your uploaded audio</p>
                               <div className="audio-player-container">
-                                <AudioPlayer src={recordedUrl} />
+                                <AudioPlayer src={recordedUrl} theme={theme} />
                               </div>
                             </div>
                           )}
@@ -1445,7 +1465,13 @@ export default function Playground() {
                             ref={fileInputRef}
                             type="file"
                             accept="audio/*"
-                            onChange={handleFileUpload}
+                            onChange={(e) => {
+                              const file = e.target.files[0]
+                              if (file) {
+                                handleFileUpload(file)
+                                e.target.value = ''
+                              }
+                            }}
                             className="upload-input"
                           />
                           <div className="upload-placeholder">
