@@ -9,8 +9,6 @@
   --slider-track-bg: #ffffff;
   --icon-color: #374151;
   --card-blur: 60px;
-  overflow: hidden;
-
 }
 
 :root[data-theme="dark"] {
@@ -23,7 +21,6 @@
   --slider-track-bg: #0a0a0a;
   --icon-color: #ffffff;
   --card-blur: 40px;
-  overflow: hidden;
 }
 
 .playground {
@@ -36,7 +33,6 @@
   flex-direction: column;
   transition: background-color 0.3s ease, color 0.3s ease;
   position: relative;
-  overflow: hidden;
 }
 
 .playground::after {
