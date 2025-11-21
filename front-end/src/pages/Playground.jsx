@@ -11,6 +11,7 @@ import { IoSunny } from 'react-icons/io5'
 import { FaMoon, FaCloudUploadAlt } from 'react-icons/fa'
 import { BsThreeDotsVertical } from 'react-icons/bs'
 import { LiaDownloadSolid } from 'react-icons/lia'
+import { CiSearch } from 'react-icons/ci'
 import AudioPlayer from '../components/AudioPlayer.jsx'
 import { getAllVoices } from '../data/voiceData.js'
 import AccountModal from '../components/AccountModal.jsx'
@@ -73,6 +74,15 @@ export default function Playground() {
   const [clonePreviewAudio, setClonePreviewAudio] = useState(null)
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
   const [showTutorial, setShowTutorial] = useState(false)
+  const [voiceSearchQuery, setVoiceSearchQuery] = useState('')
+  const [playingVoiceId, setPlayingVoiceId] = useState(null)
+  const [voicePreviewAudio, setVoicePreviewAudio] = useState(null)
+  const voicePreviewAudioRef = useRef(null)
+  const [showVoicePreviewModal, setShowVoicePreviewModal] = useState(false)
+  const [selectedVoiceForPreview, setSelectedVoiceForPreview] = useState(null)
+  const [voicePreviewText, setVoicePreviewText] = useState("Hello, this is a voice preview.")
+  const [isGeneratingVoicePreview, setIsGeneratingVoicePreview] = useState(false)
+  const [voicePreviewAudioUrl, setVoicePreviewAudioUrl] = useState(null)
   // Fix API base URL - remove trailing /api if present to avoid double /api/api
   // Note: 0.0.0.0 is not accessible from browsers, use localhost or actual hostname
   // When accessed through a domain (like somya.ai), use relative path
@@ -208,6 +218,39 @@ export default function Playground() {
     }
   }, [ttsLanguage, availableVoices, selectedVoice])
 
+  // Cleanup audio preview when component unmounts or view changes
+  useEffect(() => {
+    return () => {
+      if (voicePreviewAudioRef.current) {
+        voicePreviewAudioRef.current.pause()
+        voicePreviewAudioRef.current = null
+      }
+      if (voicePreviewAudio) {
+        URL.revokeObjectURL(voicePreviewAudio)
+        setVoicePreviewAudio(null)
+      }
+      if (voicePreviewAudioUrl) {
+        URL.revokeObjectURL(voicePreviewAudioUrl)
+        setVoicePreviewAudioUrl(null)
+      }
+      setPlayingVoiceId(null)
+    }
+  }, [activeView, voicePreviewAudio, voicePreviewAudioUrl])
+
+  // Cleanup modal audio when modal closes
+  useEffect(() => {
+    if (!showVoicePreviewModal) {
+      if (voicePreviewAudioRef.current) {
+        voicePreviewAudioRef.current.pause()
+        voicePreviewAudioRef.current = null
+      }
+      if (voicePreviewAudioUrl) {
+        URL.revokeObjectURL(voicePreviewAudioUrl)
+        setVoicePreviewAudioUrl(null)
+      }
+    }
+  }, [showVoicePreviewModal, voicePreviewAudioUrl])
+
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
     setTheme(newTheme)
@@ -226,6 +269,169 @@ export default function Playground() {
       reader.onerror = reject
       reader.readAsDataURL(blob)
     })
+  }
+
+  const handleVoicePreview = async (e, voice) => {
+    e.stopPropagation()
+    const voiceId = `${voice.language}-${voice.voice_name}`
+    
+    // If clicking the same voice that's playing, pause it
+    if (playingVoiceId === voiceId && voicePreviewAudioRef.current) {
+      voicePreviewAudioRef.current.pause()
+      setPlayingVoiceId(null)
+      setVoicePreviewAudio(null)
+      return
+    }
+    
+    // Stop any currently playing preview
+    if (voicePreviewAudioRef.current) {
+      voicePreviewAudioRef.current.pause()
+      voicePreviewAudioRef.current = null
+    }
+    
+    // Start new preview - use audio sample file
+    setPlayingVoiceId(voiceId)
+    
+    try {
+      // Try to load audio sample from public folder
+      // Map voice names to gender for audio file lookup
+      const gender = (voice.voice_name === 'diana' || voice.voice_name === 'pooja' || voice.voice_name === 'bhagya' || voice.voice_name === 'vidhya' || voice.voice_name === 'neha' || voice.voice_name === 'janki') ? 'female' : 'male'
+      const audioExtensions = { en: 'mp3', hi: 'wav', kn: 'mp3', mr: 'wav', te: 'wav', sa: 'wav', bn: 'wav', bh: 'wav', mh: 'wav', mg: 'wav', ch: 'wav', gu: 'wav' }
+      const ext = audioExtensions[voice.language] || 'mp3'
+      const audioSamplePath = `/${voice.language}-${gender}.${ext}`
+      const audio = new Audio(audioSamplePath)
+      
+      audio.onended = () => {
+        setPlayingVoiceId(null)
+        setVoicePreviewAudio(null)
+      }
+      
+      audio.onerror = () => {
+        // If sample file doesn't exist, fallback to generating preview
+        console.log('Audio sample not found, generating preview...')
+        generateVoicePreview(voice, voiceId)
+      }
+      
+      audio.onloadeddata = () => {
+        voicePreviewAudioRef.current = audio
+        setVoicePreviewAudio(audioSamplePath)
+        audio.play()
+      }
+      
+      // Try to load the audio
+      audio.load()
+    } catch (error) {
+      console.error('Error loading audio sample:', error)
+      // Fallback to generating preview
+      generateVoicePreview(voice, voiceId)
+    }
+  }
+
+  const generateVoicePreview = async (voice, voiceId) => {
+    const previewText = "Hello, this is a voice preview."
+    
+    try {
+      const requestBody = {
+        text: previewText,
+        voice: voice.voice_name,
+        language: voice.language
+      }
+      
+      const response = await fetch(`${API_BASE}/api/v1/tts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        console.error('Voice preview failed:', errorData)
+        setPlayingVoiceId(null)
+        return
+      }
+      
+      const blob = await response.blob()
+      const audioUrl = URL.createObjectURL(blob)
+      const audio = new Audio(audioUrl)
+      
+      audio.onended = () => {
+        setPlayingVoiceId(null)
+        setVoicePreviewAudio(null)
+        URL.revokeObjectURL(audioUrl)
+      }
+      
+      audio.onerror = () => {
+        setPlayingVoiceId(null)
+        setVoicePreviewAudio(null)
+        URL.revokeObjectURL(audioUrl)
+      }
+      
+      voicePreviewAudioRef.current = audio
+      setVoicePreviewAudio(audioUrl)
+      audio.play()
+    } catch (error) {
+      console.error('Error generating voice preview:', error)
+      setPlayingVoiceId(null)
+    }
+  }
+
+  const handleVoiceModalPreview = async () => {
+    if (!selectedVoiceForPreview || !voicePreviewText.trim() || isGeneratingVoicePreview) {
+      return
+    }
+    
+    setIsGeneratingVoicePreview(true)
+    
+    // Stop any currently playing preview
+    if (voicePreviewAudioRef.current) {
+      voicePreviewAudioRef.current.pause()
+      voicePreviewAudioRef.current = null
+    }
+    if (voicePreviewAudioUrl) {
+      URL.revokeObjectURL(voicePreviewAudioUrl)
+      setVoicePreviewAudioUrl(null)
+    }
+    
+    try {
+      const requestBody = {
+        text: voicePreviewText.trim(),
+        voice: selectedVoiceForPreview.voice_name,
+        language: selectedVoiceForPreview.language
+      }
+      
+      const response = await fetch(`${API_BASE}/api/v1/tts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        console.error('Voice preview failed:', errorData)
+        alert('Failed to generate preview. Please try again.')
+        setIsGeneratingVoicePreview(false)
+        return
+      }
+      
+      const blob = await response.blob()
+      const audioUrl = URL.createObjectURL(blob)
+      setVoicePreviewAudioUrl(audioUrl)
+    } catch (error) {
+      console.error('Error generating voice preview:', error)
+      alert('Failed to generate preview. Please try again.')
+    } finally {
+      setIsGeneratingVoicePreview(false)
+    }
+  }
+
+  const handleGoToTextToSpeech = () => {
+    if (selectedVoiceForPreview) {
+      setActiveView('text-to-speech')
+      setTtsLanguage(selectedVoiceForPreview.language)
+      setSelectedVoice(selectedVoiceForPreview.voice_name)
+      setSearchParams({ view: 'text-to-speech' })
+      setShowVoicePreviewModal(false)
+    }
   }
 
   const handleSpeak = async () => {
@@ -1030,13 +1236,25 @@ export default function Playground() {
         ) : activeView === 'voices' ? (
           <div className="voices-view-container">
             <div className="voices-view-header">
-              <h1 className="voices-view-title">Available Voices</h1>
+              <div className="voices-view-title-row">
+                <h1 className="voices-view-title">Available Voices</h1>
+                <div className="voice-search-container">
+                  <CiSearch className="voice-search-icon" />
+                  <input
+                    type="text"
+                    className="voice-search-input"
+                    placeholder="Search voices by name or language..."
+                    value={voiceSearchQuery}
+                    onChange={(e) => setVoiceSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
               <p className="voices-view-subtitle">Explore our collection of voices across multiple languages</p>
             </div>
             <div className="voices-cards-grid">
               {(() => {
                 // Use local voice data if API data is empty or unavailable
-                const voicesToDisplay = availableVoices.length > 0 
+                let voicesToDisplay = availableVoices.length > 0 
                   ? availableVoices.filter(voice => voice.available)
                   : getAllVoices().map(voice => ({
                       language: voice.language,
@@ -1045,10 +1263,34 @@ export default function Playground() {
                       voiceId: voice.voiceId
                     }))
                 
+                // Filter by search query
+                if (voiceSearchQuery.trim()) {
+                  const query = voiceSearchQuery.toLowerCase()
+                  voicesToDisplay = voicesToDisplay.filter(voice => {
+                    const localVoiceData = getAllVoices().find(v => 
+                      v.language === voice.language && 
+                      ((v.gender === 'female' && (voice.voice_name === 'diana' || voice.voice_name === 'pooja' || voice.voice_name === 'bhagya' || voice.voice_name === 'vidhya' || voice.voice_name === 'neha' || voice.voice_name === 'janki')) || 
+                       (v.gender === 'male' && (voice.voice_name === 'patrick' || voice.voice_name === 'surya' || voice.voice_name === 'arush' || voice.voice_name === 'ranna' || voice.voice_name === 'kabir' || voice.voice_name === 'raghava')))
+                    )
+                    const displayName = localVoiceData?.displayName || 
+                      `${voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)}`
+                    const languageNames = {
+                      en: 'English', hi: 'Hindi', kn: 'Kannada', te: 'Telugu', mr: 'Marathi',
+                      sa: 'Sanskrit', bn: 'Bengali', bh: 'Bhojpuri', mh: 'Maithili', mg: 'Magahi',
+                      ch: 'Chhattisgarhi', gu: 'Gujarati'
+                    }
+                    const languageName = languageNames[voice.language] || voice.language.toUpperCase()
+                    return displayName.toLowerCase().includes(query) || 
+                           voice.voice_name.toLowerCase().includes(query) ||
+                           languageName.toLowerCase().includes(query) ||
+                           voice.language.toLowerCase().includes(query)
+                  })
+                }
+                
                 if (voicesToDisplay.length === 0) {
                   return (
                     <div className="voices-loading">
-                      <p>Loading voices...</p>
+                      <p>{voiceSearchQuery.trim() ? 'No voices found matching your search.' : 'Loading voices...'}</p>
                     </div>
                   )
                 }
@@ -1076,36 +1318,35 @@ export default function Playground() {
                      (v.gender === 'male' && (voice.voice_name === 'patrick' || voice.voice_name === 'surya' || voice.voice_name === 'arush' || voice.voice_name === 'ranna' || voice.voice_name === 'kabir' || voice.voice_name === 'raghava')))
                   )
                   
-                  const description = localVoiceData?.description || 
-                    `${voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)} voice for ${languageNames[voice.language] || voice.language.toUpperCase()}`
-                  
                   const displayName = localVoiceData?.displayName || 
                     `${voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)}`
+                  const description = localVoiceData?.description || ''
+                  
+                  const voiceId = `${voice.language}-${voice.voice_name}`
+                  const isPlaying = playingVoiceId === voiceId
                   
                   return (
                     <div 
-                      key={`${voice.language}-${voice.voice_name}`}
+                      key={voiceId}
                       className="voice-detail-card"
                       onClick={() => {
-                        const voiceId = voice.voiceId || `${voice.language}-${voice.voice_name}-001`
-                        navigate(`/voices/${voiceId}`)
+                        setSelectedVoiceForPreview(voice)
+                        setShowVoicePreviewModal(true)
                       }}
                       style={{ cursor: 'pointer' }}
                     >
-                      
                       <div className="voice-card-content">
                         <div className="voice-card-header">
-                          <h3 className="voice-card-name">
-                            {displayName}
-                          </h3>
-                          <span className="voice-card-badge available">Available</span>
-                        </div>
-                        <p className="voice-card-description">
-                          {description}
-                        </p>
-                        <div className="voice-card-footer">
-                          <span className="voice-card-language">{voice.language.toUpperCase()}</span>
-                          <span className="voice-card-gender">{voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)}</span>
+                          <div className="voice-card-info">
+                            <h3 className="voice-card-name">
+                              {displayName}
+                            </h3>
+                            {description && (
+                              <p className="voice-card-description">
+                                {description}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1113,6 +1354,164 @@ export default function Playground() {
                 })
               })()}
             </div>
+
+          {/* Voice Preview Modal */}
+          {showVoicePreviewModal && selectedVoiceForPreview && (
+            <div className="voice-preview-overlay" onClick={() => setShowVoicePreviewModal(false)}>
+              <div className="voice-preview-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="voice-preview-header">
+                  <button
+                    className="voice-preview-close-btn"
+                    onClick={() => setShowVoicePreviewModal(false)}
+                  >
+                    <IoClose />
+                  </button>
+                </div>
+                
+                {(() => {
+                  const localVoiceData = getAllVoices().find(v => 
+                    v.language === selectedVoiceForPreview.language && 
+                    ((v.gender === 'female' && (selectedVoiceForPreview.voice_name === 'diana' || selectedVoiceForPreview.voice_name === 'pooja' || selectedVoiceForPreview.voice_name === 'bhagya' || selectedVoiceForPreview.voice_name === 'vidhya' || selectedVoiceForPreview.voice_name === 'neha' || selectedVoiceForPreview.voice_name === 'janki')) || 
+                     (v.gender === 'male' && (selectedVoiceForPreview.voice_name === 'patrick' || selectedVoiceForPreview.voice_name === 'surya' || selectedVoiceForPreview.voice_name === 'arush' || selectedVoiceForPreview.voice_name === 'ranna' || selectedVoiceForPreview.voice_name === 'kabir' || selectedVoiceForPreview.voice_name === 'raghava')))
+                  )
+                  const displayName = localVoiceData?.displayName || 
+                    `${selectedVoiceForPreview.voice_name.charAt(0).toUpperCase() + selectedVoiceForPreview.voice_name.slice(1)}`
+                  const languageNames = {
+                    en: 'English', hi: 'Hindi', kn: 'Kannada', te: 'Telugu', mr: 'Marathi',
+                    sa: 'Sanskrit', bn: 'Bengali', bh: 'Bhojpuri', mh: 'Maithili', mg: 'Magahi',
+                    ch: 'Chhattisgarhi', gu: 'Gujarati'
+                  }
+                  const languageName = languageNames[selectedVoiceForPreview.language] || selectedVoiceForPreview.language.toUpperCase()
+                  
+                  return (
+                    <>
+                      <h2 className="voice-preview-title">{displayName}</h2>
+                      <p className="voice-preview-subtitle">{languageName}</p>
+                      
+                      <div className="voice-preview-section">
+                        <h3 className="voice-preview-section-title">Preview</h3>
+                        <div className="voice-preview-controls">
+                          <textarea
+                            className="voice-preview-text"
+                            value={voicePreviewText}
+                            onChange={(e) => setVoicePreviewText(e.target.value)}
+                            placeholder="Enter text to preview..."
+                            rows={4}
+                          />
+                          <button
+                            className="voice-preview-speak-btn"
+                            onClick={handleVoiceModalPreview}
+                            disabled={isGeneratingVoicePreview || !voicePreviewText.trim()}
+                          >
+                            {isGeneratingVoicePreview ? 'Generating...' : <><FaPlay /> Preview</>}
+                          </button>
+                        </div>
+                        
+                        {voicePreviewAudioUrl && (
+                          <div className="voice-preview-audio">
+                            <AudioPlayer
+                              src={voicePreviewAudioUrl}
+                              hideControls={false}
+                              showLanguage={false}
+                              theme={theme}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="voice-preview-actions">
+                        <button 
+                          className="voice-preview-action-btn primary"
+                          onClick={handleGoToTextToSpeech}
+                        >
+                          Use in Text to Speech
+                        </button>
+                      </div>
+                    </>
+                  )
+                })()}
+              </div>
+            </div>
+          )}
+
+          {/* Voice Preview Modal - shown when clicking a voice */}
+          {showVoicePreviewModal && selectedVoiceForPreview && (
+            <div className="voice-preview-overlay" onClick={() => setShowVoicePreviewModal(false)}>
+              <div className="voice-preview-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="voice-preview-header">
+                  <button
+                    className="voice-preview-close-btn"
+                    onClick={() => setShowVoicePreviewModal(false)}
+                  >
+                    <IoClose />
+                  </button>
+                </div>
+                
+                {(() => {
+                  const localVoiceData = getAllVoices().find(v => 
+                    v.language === selectedVoiceForPreview.language && 
+                    ((v.gender === 'female' && (selectedVoiceForPreview.voice_name === 'diana' || selectedVoiceForPreview.voice_name === 'pooja' || selectedVoiceForPreview.voice_name === 'bhagya' || selectedVoiceForPreview.voice_name === 'vidhya' || selectedVoiceForPreview.voice_name === 'neha' || selectedVoiceForPreview.voice_name === 'janki')) || 
+                     (v.gender === 'male' && (selectedVoiceForPreview.voice_name === 'patrick' || selectedVoiceForPreview.voice_name === 'surya' || selectedVoiceForPreview.voice_name === 'arush' || selectedVoiceForPreview.voice_name === 'ranna' || selectedVoiceForPreview.voice_name === 'kabir' || selectedVoiceForPreview.voice_name === 'raghava')))
+                  )
+                  const displayName = localVoiceData?.displayName || 
+                    `${selectedVoiceForPreview.voice_name.charAt(0).toUpperCase() + selectedVoiceForPreview.voice_name.slice(1)}`
+                  const languageNames = {
+                    en: 'English', hi: 'Hindi', kn: 'Kannada', te: 'Telugu', mr: 'Marathi',
+                    sa: 'Sanskrit', bn: 'Bengali', bh: 'Bhojpuri', mh: 'Maithili', mg: 'Magahi',
+                    ch: 'Chhattisgarhi', gu: 'Gujarati'
+                  }
+                  const languageName = languageNames[selectedVoiceForPreview.language] || selectedVoiceForPreview.language.toUpperCase()
+                  
+                  return (
+                    <>
+                      <h2 className="voice-preview-title">{displayName}</h2>
+                      <p className="voice-preview-subtitle">{languageName}</p>
+                      
+                      <div className="voice-preview-section">
+                        <h3 className="voice-preview-section-title">Preview</h3>
+                        <div className="voice-preview-controls">
+                          <textarea
+                            className="voice-preview-text"
+                            value={voicePreviewText}
+                            onChange={(e) => setVoicePreviewText(e.target.value)}
+                            placeholder="Enter text to preview..."
+                            rows={4}
+                          />
+                          <button
+                            className="voice-preview-speak-btn"
+                            onClick={handleVoiceModalPreview}
+                            disabled={isGeneratingVoicePreview || !voicePreviewText.trim()}
+                          >
+                            {isGeneratingVoicePreview ? 'Generating...' : <><FaPlay /> Preview</>}
+                          </button>
+                        </div>
+                        
+                        {voicePreviewAudioUrl && (
+                          <div className="voice-preview-audio">
+                            <AudioPlayer
+                              src={voicePreviewAudioUrl}
+                              hideControls={false}
+                              showLanguage={false}
+                              theme={theme}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="voice-preview-actions">
+                        <button 
+                          className="voice-preview-action-btn primary"
+                          onClick={handleGoToTextToSpeech}
+                        >
+                          Use in Text to Speech
+                        </button>
+                      </div>
+                    </>
+                  )
+                })()}
+              </div>
+            </div>
+            )}
           </div>
         ) : activeView === 'speech-to-text' ? (
           <div className="speech-to-text-container">
@@ -1666,3 +2065,4 @@ export default function Playground() {
     </div>
   )
 }
+
