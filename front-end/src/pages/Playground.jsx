@@ -1355,97 +1355,12 @@ export default function Playground() {
               })()}
             </div>
 
-          {/* Voice Preview Modal */}
-          {showVoicePreviewModal && selectedVoiceForPreview && (
-            <div className="voice-preview-overlay" onClick={() => setShowVoicePreviewModal(false)}>
-              <div className="voice-preview-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="voice-preview-header">
-                  <button
-                    className="voice-preview-close-btn"
-                    onClick={() => setShowVoicePreviewModal(false)}
-                  >
-                    <IoClose />
-                  </button>
-                </div>
-                
-                {(() => {
-                  const localVoiceData = getAllVoices().find(v => 
-                    v.language === selectedVoiceForPreview.language && 
-                    ((v.gender === 'female' && (selectedVoiceForPreview.voice_name === 'diana' || selectedVoiceForPreview.voice_name === 'pooja' || selectedVoiceForPreview.voice_name === 'bhagya' || selectedVoiceForPreview.voice_name === 'vidhya' || selectedVoiceForPreview.voice_name === 'neha' || selectedVoiceForPreview.voice_name === 'janki')) || 
-                     (v.gender === 'male' && (selectedVoiceForPreview.voice_name === 'patrick' || selectedVoiceForPreview.voice_name === 'surya' || selectedVoiceForPreview.voice_name === 'arush' || selectedVoiceForPreview.voice_name === 'ranna' || selectedVoiceForPreview.voice_name === 'kabir' || selectedVoiceForPreview.voice_name === 'raghava')))
-                  )
-                  const displayName = localVoiceData?.displayName || 
-                    `${selectedVoiceForPreview.voice_name.charAt(0).toUpperCase() + selectedVoiceForPreview.voice_name.slice(1)}`
-                  const languageNames = {
-                    en: 'English', hi: 'Hindi', kn: 'Kannada', te: 'Telugu', mr: 'Marathi',
-                    sa: 'Sanskrit', bn: 'Bengali', bh: 'Bhojpuri', mh: 'Maithili', mg: 'Magahi',
-                    ch: 'Chhattisgarhi', gu: 'Gujarati'
-                  }
-                  const languageName = languageNames[selectedVoiceForPreview.language] || selectedVoiceForPreview.language.toUpperCase()
-                  
-                  return (
-                    <>
-                      <h2 className="voice-preview-title">{displayName}</h2>
-                      <p className="voice-preview-subtitle">{languageName}</p>
-                      
-                      <div className="voice-preview-section">
-                        <h3 className="voice-preview-section-title">Preview</h3>
-                        <div className="voice-preview-controls">
-                          <textarea
-                            className="voice-preview-text"
-                            value={voicePreviewText}
-                            onChange={(e) => setVoicePreviewText(e.target.value)}
-                            placeholder="Enter text to preview..."
-                            rows={4}
-                          />
-                          <button
-                            className="voice-preview-speak-btn"
-                            onClick={handleVoiceModalPreview}
-                            disabled={isGeneratingVoicePreview || !voicePreviewText.trim()}
-                          >
-                            {isGeneratingVoicePreview ? 'Generating...' : <><FaPlay /> Preview</>}
-                          </button>
-                        </div>
-                        
-                        {voicePreviewAudioUrl && (
-                          <div className="voice-preview-audio">
-                            <AudioPlayer
-                              src={voicePreviewAudioUrl}
-                              hideControls={false}
-                              showLanguage={false}
-                              theme={theme}
-                            />
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="voice-preview-actions">
-                        <button 
-                          className="voice-preview-action-btn primary"
-                          onClick={handleGoToTextToSpeech}
-                        >
-                          Use in Text to Speech
-                        </button>
-                      </div>
-                    </>
-                  )
-                })()}
-              </div>
-            </div>
-          )}
+          
 
           {/* Voice Preview Modal - shown when clicking a voice */}
           {showVoicePreviewModal && selectedVoiceForPreview && (
             <div className="voice-preview-overlay" onClick={() => setShowVoicePreviewModal(false)}>
               <div className="voice-preview-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="voice-preview-header">
-                  <button
-                    className="voice-preview-close-btn"
-                    onClick={() => setShowVoicePreviewModal(false)}
-                  >
-                    <IoClose />
-                  </button>
-                </div>
                 
                 {(() => {
                   const localVoiceData = getAllVoices().find(v => 
@@ -1464,11 +1379,15 @@ export default function Playground() {
                   
                   return (
                     <>
+                      <div>
                       <h2 className="voice-preview-title">{displayName}</h2>
-                      <p className="voice-preview-subtitle">{languageName}</p>
+                      </div>
+                      
+                      <div>
+                      <p className="voice-preview-subtitle"> Language : {languageName}</p>
+                      </div>
                       
                       <div className="voice-preview-section">
-                        <h3 className="voice-preview-section-title">Preview</h3>
                         <div className="voice-preview-controls">
                           <textarea
                             className="voice-preview-text"
