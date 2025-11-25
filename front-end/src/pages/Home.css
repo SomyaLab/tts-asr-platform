@@ -456,6 +456,13 @@
     color: #000000;
   }
 }
+
+@media (prefers-color-scheme: dark) {
+  .blog {
+    background: #000000;
+    color: #ffffff;
+  }
+}
 .blog-wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; box-sizing: border-box; }
 .blog-header h2 { font-size: clamp(28px, 4.2vw, 40px); margin: 0 0 8px; color: #e5e7eb; }
 .blog-header p { margin: 0 0 28px; color: #cbd5e1; }
@@ -463,6 +470,7 @@
   .blog-header h2 { color: #000000; }
   .blog-header p { color: #000000; }
 }
+
 .blog-viewall { display: none; }
 .blog-grid { display: grid; grid-template-columns: 1fr 80px 80px; gap: 20px; align-items: stretch; }
 /* When card 1 open: primary column wide, others narrow */
