@@ -152,8 +152,6 @@ The study of **Sanskrit and Prakrit** is therefore indispensable for tracing the
     image: '/pali.jpg',
     excerpt: 'Pāli is a crucial Middle Indo-Aryan language primarily known as the textual language of the Tipiṭaka, the authoritative scriptures of Theravāda Buddhism. Originating from ancient vernaculars (Prakrits), Pāli was committed to writing in Sri Lanka and is distinguished from Sanskrit by its phonetic and grammatical simplifications. It remains the essential scholarly medium for monks and a vital cultural link for Buddhist communities across South and Southeast Asia.',
     content: `
-## Pāli: The Language of the Buddhist Canon
-
 Pāli is a Middle Indo-Aryan (MIA) language historically important as the canonical language of Theravāda Buddhism, a tradition prevalent across Sri Lanka and Southeast Asia (Myanmar, Thailand, Cambodia, Laos).
 
 ## Origin and History
