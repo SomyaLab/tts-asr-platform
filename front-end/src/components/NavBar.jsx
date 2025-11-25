@@ -90,7 +90,7 @@ export default function NavBar() {
         <div className="nav-glass">
           <div className="site-brand">
             <img src="/logo.png" alt="Somya Labs logo" className="site-logo" />
-            <span>Somya Lab</span>
+            <span className="site-brand-text">Somya Labs</span>
           </div>
 
           {/* Mobile toggle button */}

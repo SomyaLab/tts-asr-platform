@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link, useLocation } from 'react-router-dom'
 import { AiOutlineHome } from 'react-icons/ai'
+import ReactMarkdown from 'react-markdown'
 import './Blogs.css'
 import { BLOGS } from './blogsData.js'
 import { STORIES } from './storiesData.js'
@@ -58,9 +59,9 @@ export default function Blogs() {
           </div>
 
           <div id="content" className="blog-detail">
-            {current.content.map((p, i) => (
-              <p key={i} className="detail-paragraph">{p}</p>
-            ))}
+            <div className="blog-markdown">
+              <ReactMarkdown>{current.content}</ReactMarkdown>
+            </div>
           </div>
           <div style={{ marginTop: 16 }}>
             <Link to="/" className="blog-cta">Back to Home</Link>

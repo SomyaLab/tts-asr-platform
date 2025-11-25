@@ -13,8 +13,9 @@
   z-index: 1000;
 }
 .header-inner { gap: 50px; align-content: center; width: 100%; display: flex; padding: 0 24px; box-sizing: border-box; max-width: 1200px; margin: 0 auto; }
-.site-brand { font-weight: 700; letter-spacing: 0.08em; display: flex; align-items: center; gap: 10px; flex: 0 0 auto; margin-left: 0; }
+.site-brand { font-weight: 700; letter-spacing: 0.08em; display: flex; align-items: center; flex: 0 0 auto; margin-left: 0; }
 .site-logo { width: 40px; height: 40px; object-fit: contain; display: block; }
+.site-brand-text { font-size: 24px; font-weight: 700; letter-spacing: 0.08em; font-family: 'Hina Mincho', serif;}
 .site-links { display: flex; gap: 24px; }
 .site-links a {
   position: relative;
