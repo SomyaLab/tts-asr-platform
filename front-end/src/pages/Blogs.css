@@ -65,13 +65,14 @@
     color: #1a1a1a; 
     margin: 0 0 16px;
   }
+  .blog-title-hero{
+    color:#000000;
+  }
 }
 .hero-ctas { display: flex; gap: 12px; justify-content: center; }
 .blog-detail {
   margin-top: 16px;
   background: #000000;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
   padding: 24px;
   color: #e0e0e0;
 }
@@ -272,8 +273,6 @@
 .blog-cta {
   display: inline-block;
   padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid #1f2937;
   background: transparent;
   color: #111827;
   text-decoration: none;

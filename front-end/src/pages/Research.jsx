@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { FaArrowLeft } from 'react-icons/fa'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import './Blogs.css'
@@ -14,7 +15,7 @@ export default function Research() {
       <div className="blog-wrap">
         <div style={{ marginBottom: 20 }}>
           <Link to="/all" className="blog-cta" title="Back to All Posts" aria-label="Back to All Posts">
-            ← Back to All Posts
+            <FaArrowLeft style={{ verticalAlign: 'middle', marginRight: 6 }} /> Back to All Posts
           </Link>
         </div>
 
@@ -31,7 +32,9 @@ export default function Research() {
             </div>
           </div>
           <div style={{ marginTop: 16 }}>
-            <Link to="/all" className="blog-cta">Back to All Posts</Link>
+            <Link to="/all" className="blog-cta">
+              <FaArrowLeft style={{ verticalAlign: 'middle', marginRight: 6 }} /> Back to All Posts
+            </Link>
           </div>
         </article>
       </div>

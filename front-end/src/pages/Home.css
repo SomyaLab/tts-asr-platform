@@ -453,7 +453,7 @@
 @media (prefers-color-scheme: light) {
   .blog {
     background: #E5E8EB;
-    color: #000000;
+    color: #ffffff;
   }
 }
 
@@ -600,7 +600,7 @@
   .blog-body, .blog-cta { display: none !important; }
 }
 
-.blog-detail { margin-top: 40px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; }
+.blog-detail { margin-top: 40px; background: #ffffff; border-radius: 16px; padding: 24px; }
 .detail-title { margin: 0 0 8px; font-size: 24px; }
 .detail-subtitle { margin: 0 0 16px; color: #000000; }
 

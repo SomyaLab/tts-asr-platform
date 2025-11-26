@@ -1,12 +1,22 @@
-import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { AiOutlineHome } from 'react-icons/ai'
 import './Home.css'
 import { BLOGS } from './blogsData.js'
 import { LATEST_RESEARCH } from './latestResearchData.js'
 
 export default function AllContent() {
+  const location = useLocation()
   const [activeFilter, setActiveFilter] = useState('all')
+
+  // Read filter from URL query parameter
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const filter = params.get('filter')
+    if (filter === 'blogs' || filter === 'research') {
+      setActiveFilter(filter)
+    }
+  }, [location.search])
 
   // Format date like "AUG 19, 2025"
   const formatDate = (dateString) => {

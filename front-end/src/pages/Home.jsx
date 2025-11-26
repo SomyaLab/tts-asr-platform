@@ -247,7 +247,7 @@ export default function Home() {
       <div className="blog-wrap">
         <div className="blog-header">
           <h2><a href="/blogs/blog-tts" style={{ color: 'inherit', textDecoration: 'none' }}>Blogs</a></h2>
-          <a className="blog-viewall" href="/all">View all</a>
+          <Link className="blog-viewall" to="/all?filter=blogs">View all</Link>
         </div>
         <div className={`blog-grid open-${BLOGS.findIndex(x => x.id === hoveredBlogId) + 1}`} onMouseLeave={() => setHoveredBlogId(BLOGS[0].id)}>
           {BLOGS.slice(0, 3).map(b => (
@@ -282,7 +282,7 @@ export default function Home() {
       <div className="stories-wrap">
         <div className="stories-header">
           <h2 className="stories-title">Latest Research</h2>
-          <a className="stories-viewall" href="/all">View all</a>
+          <Link className="stories-viewall" to="/all?filter=research">View all</Link>
         </div>
         <div className="stories-grid">
           {LATEST_RESEARCH.slice(0, 5).map((research, index) => {
