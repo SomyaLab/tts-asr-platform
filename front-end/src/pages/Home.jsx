@@ -293,9 +293,9 @@ export default function Home() {
               <Link key={research.id} to={`/research/${research.id}`} className={`story-card ${spanClasses} ${cardClasses}`}>
                 <div className="story-head">
                   <div className="story-eyebrow">{research.eyebrow}</div>
-                  <div className={`story-title ${index === 3 ? 'big' : ''}`}>{research.title}</div>
                 </div>
                 <img className={`story-image ${scaleClass}`} src={research.image} alt={research.title} />
+                <div className={`story-title-bottom ${index === 3 ? 'big' : ''}`}>{research.title}</div>
               </Link>
             )
           })}
