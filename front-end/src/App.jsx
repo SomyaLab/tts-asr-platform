@@ -4,6 +4,7 @@ import './App.css'
 import NavBar from './components/NavBar.jsx'
 import Home from './pages/Home.jsx'
 import Blogs from './pages/Blogs.jsx'
+import Research from './pages/Research.jsx'
 import AllContent from './pages/AllContent.jsx'
 import Playground from './pages/Playground.jsx'
 import Pricing from './pages/Pricing.jsx'
@@ -189,6 +190,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/all" element={<AllContent />} />
         <Route path="/blogs/:blogId" element={<Blogs />} />
+        <Route path="/research/:researchId" element={<Research />} />
         <Route path="/playground" element={<Playground />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/about" element={<AboutUs />} />

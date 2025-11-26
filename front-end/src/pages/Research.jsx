@@ -3,11 +3,11 @@ import { useParams, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import './Blogs.css'
-import { BLOGS } from './blogsData.js'
+import { LATEST_RESEARCH } from './latestResearchData.js'
 
-export default function Blogs() {
+export default function Research() {
   const params = useParams()
-  const current = useMemo(() => BLOGS.find(b => b.id === params.blogId) ?? BLOGS[0], [params.blogId])
+  const current = useMemo(() => LATEST_RESEARCH.find(r => r.id === params.researchId) ?? LATEST_RESEARCH[0], [params.researchId])
 
   return (
     <section className="blog blog-page">
@@ -20,10 +20,9 @@ export default function Blogs() {
 
         <article className="blog-article">
           <div className="blog-hero">
-            <div className="meta-line">{new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+            <div className="meta-line">{new Date(current.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</div>
             <h1 className="blog-title-hero">{current.title}</h1>
             <p className="blog-sub-hero">{current.subtitle}</p>
-            
           </div>
 
           <div id="content" className="blog-detail">
@@ -39,5 +38,4 @@ export default function Blogs() {
     </section>
   )
 }
-
 

@@ -12,7 +12,7 @@
   padding: 0 24px;
   box-sizing: border-box;
 }
-.two-col { display: grid; grid-template-columns: 220px 1fr; gap: 28px; }
+/* Removed two-col layout - now single column */
 .blog-header h2 {
   font-size: clamp(28px, 4.2vw, 40px);
   margin: 0 0 8px;
@@ -21,7 +21,7 @@
   margin: 0 0 28px;
   color: #334155;
 }
-.blog-aside { position: sticky; top: 84px; align-self: start; }
+.blog-aside { position: sticky; align-self: start; width: auto;}
 .side-buttons { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
 .side-btn { padding: 8px 12px; border-radius: 9999px; border: 1px solid #e5e7eb; background: #f8fafc; color: #0b0f14; cursor: pointer; }
 @media (prefers-color-scheme: dark) {

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import './Home.css'
 import AudioPlayer from '../components/AudioPlayer.jsx'
 import { BLOGS } from './blogsData.js'
-import { STORIES } from './storiesData.js'
+import { LATEST_RESEARCH } from './latestResearchData.js'
 import { useAuth } from '../AuthContext.jsx'
 import AuthModal from '../components/AuthModal.jsx'
 
@@ -277,52 +277,28 @@ export default function Home() {
       </div>
     </section>
 
-    {/* Stories section */}
+    {/* Latest Research section */}
     <section className="stories">
       <div className="stories-wrap">
-        <h2 className="stories-title"><a href="/blogs/blog-tts" style={{ color: 'inherit', textDecoration: 'none' }}>Latest Research</a></h2>
+        <div className="stories-header">
+          <h2 className="stories-title">Latest Research</h2>
+          <a className="stories-viewall" href="/all">View all</a>
+        </div>
         <div className="stories-grid">
-          <a className="story-card span-4" href="#">
-            <div className="story-head">
-              <div className="story-eyebrow"> </div>
-              <div className="story-title"> </div>
-            </div>
-            <img className="story-image" src="/Pattern1.png" alt="" />
-          </a>
-
-          <a className="story-card span-4" href="#">
-            <div className="story-head">
-              <div className="story-eyebrow"> </div>
-              <div className="story-title"></div>
-            </div>
-            <img className="story-image" src="/Pattern2.png" alt="" />
-          </a>
-
-          <a className="story-card span-4" href="#">
-            <div className="story-head">
-              <div className="story-eyebrow"></div>
-              <div className="story-title"></div>
-            </div>
-            <img className="story-image" src="/Pattern4.png" alt="" />
-          </a>
-
-          <a className="story-card span-5 with-footer" href="#">
-            <div className="story-head">
-              <div className="story-eyebrow"></div>
-              <div className="story-title big"></div>
-            </div>
-            <img className="story-image scale-zoom" src="/Pattern3.png" alt="" />
-            
-          </a>
-
-          <a className="story-card span-7 with-footer" href="#">
-            <div className="story-head">
-              <div className="story-eyebrow"> </div>
-              <div className="story-title"></div>
-            </div>
-            <img className="story-image" src="/Pattern5.png" alt="" />
-            
-          </a>
+          {LATEST_RESEARCH.slice(0, 5).map((research, index) => {
+            const spanClasses = index === 3 ? 'span-5' : index === 4 ? 'span-7' : 'span-4'
+            const cardClasses = index >= 3 ? 'with-footer' : ''
+            const scaleClass = index === 3 ? 'scale-zoom' : ''
+            return (
+              <Link key={research.id} to={`/research/${research.id}`} className={`story-card ${spanClasses} ${cardClasses}`}>
+                <div className="story-head">
+                  <div className="story-eyebrow">{research.eyebrow}</div>
+                  <div className={`story-title ${index === 3 ? 'big' : ''}`}>{research.title}</div>
+                </div>
+                <img className={`story-image ${scaleClass}`} src={research.image} alt={research.title} />
+              </Link>
+            )
+          })}
         </div>
       </div>
     </section>
