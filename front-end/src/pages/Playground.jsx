@@ -198,9 +198,6 @@ export default function Playground() {
     fetchVoices()
   }, [])
 
-  // Get all available voices (no longer filtered by language)
-  const filteredVoices = availableVoices.filter(voice => voice.available)
-
   // Get recommended voices for selected language
   const getRecommendedVoices = (language) => {
     if (!language) return []
@@ -210,6 +207,23 @@ export default function Playground() {
   }
 
   const recommendedVoices = getRecommendedVoices(ttsLanguage)
+
+  // Get all available voices (no longer filtered by language) and sort: recommended first, then alphabetically
+  const filteredVoices = availableVoices
+    .filter(voice => voice.available)
+    .sort((a, b) => {
+      const aIsRecommended = recommendedVoices.includes(a.voice_name)
+      const bIsRecommended = recommendedVoices.includes(b.voice_name)
+      
+      // Recommended voices come first
+      if (aIsRecommended && !bIsRecommended) return -1
+      if (!aIsRecommended && bIsRecommended) return 1
+      
+      // Within same category (both recommended or both not), sort alphabetically
+      const nameA = a.voice_name.charAt(0).toUpperCase() + a.voice_name.slice(1)
+      const nameB = b.voice_name.charAt(0).toUpperCase() + b.voice_name.slice(1)
+      return nameA.localeCompare(nameB)
+    })
 
   // Get recommended voices display text
   const getRecommendedText = (language) => {
