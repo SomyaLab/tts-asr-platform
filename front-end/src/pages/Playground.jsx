@@ -25,7 +25,7 @@ export default function Playground() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [textToSpeak, setTextToSpeak] = useState('')
   const [selectedModel, setSelectedModel] = useState('Panini 0.1')
-  const [selectedVoice, setSelectedVoice] = useState('diana') // Default to first English voice
+  const [selectedVoice, setSelectedVoice] = useState('') // Start with no voice selected
   const [ttsLanguage, setTtsLanguage] = useState('')
   const [availableVoices, setAvailableVoices] = useState([])
   const [transcriptLanguage, setTranscriptLanguage] = useState('')
@@ -198,25 +198,27 @@ export default function Playground() {
     fetchVoices()
   }, [])
 
-  // Filter voices by selected language
-  const filteredVoices = availableVoices.filter(voice => 
-    voice.language === ttsLanguage && voice.available
-  )
+  // Get all available voices (no longer filtered by language)
+  const filteredVoices = availableVoices.filter(voice => voice.available)
 
-  // Update selected voice when language changes - use first available voice for the language
-  useEffect(() => {
-    const voicesForLanguage = availableVoices.filter(voice => 
-      voice.language === ttsLanguage && voice.available
-    )
-    if (voicesForLanguage.length > 0) {
-      // Check if current voice is available for this language
-      const currentVoiceAvailable = voicesForLanguage.find(v => v.voice_name === selectedVoice)
-      if (!currentVoiceAvailable) {
-        // Use first available voice for the language
-        setSelectedVoice(voicesForLanguage[0].voice_name)
-      }
-    }
-  }, [ttsLanguage, availableVoices, selectedVoice])
+  // Get recommended voices for selected language
+  const getRecommendedVoices = (language) => {
+    if (!language) return []
+    return availableVoices.filter(voice => 
+      voice.language === language && voice.available
+    ).map(v => v.voice_name)
+  }
+
+  const recommendedVoices = getRecommendedVoices(ttsLanguage)
+
+  // Get recommended voices display text
+  const getRecommendedText = (language) => {
+    if (!language) return ''
+    const recommended = getRecommendedVoices(language)
+    if (recommended.length === 0) return ''
+    const voiceNames = recommended.map(v => v.charAt(0).toUpperCase() + v.slice(1)).join(' and ')
+    return `${voiceNames} recommended`
+  }
 
   // Cleanup audio preview when component unmounts or view changes
   useEffect(() => {
@@ -435,9 +437,11 @@ export default function Playground() {
   }
 
   const handleSpeak = async () => {
-    if (isSending || !textToSpeak.trim() || !ttsLanguage) {
+    if (isSending || !textToSpeak.trim() || !ttsLanguage || !selectedVoice) {
       if (!ttsLanguage) {
         alert('Please select a language first')
+      } else if (!selectedVoice) {
+        alert('Please select a voice')
       }
       return
     }
@@ -1133,12 +1137,22 @@ export default function Playground() {
                                 onChange={(e) => setTempControlValue(e.target.value)}
                                 disabled={filteredVoices.length === 0}
                               >
+                                <option value="">Select voice</option>
                                 {filteredVoices.length > 0 ? (
-                                  filteredVoices.map((voice) => (
-                                    <option key={`${voice.language}-${voice.voice_name}`} value={voice.voice_name}>
-                                      {voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)}
-                                    </option>
-                                  ))
+                                  filteredVoices.map((voice) => {
+                                    const isRecommended = recommendedVoices.includes(voice.voice_name)
+                                    const displayName = voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)
+                                    return (
+                                      <option 
+                                        key={`${voice.language}-${voice.voice_name}`} 
+                                        value={voice.voice_name}
+                                        data-recommended={isRecommended ? 'true' : 'false'}
+                                        className={isRecommended ? 'recommended-option' : ''}
+                                      >
+                                        {displayName}{isRecommended ? ' (recommended)' : ''}
+                                      </option>
+                                    )
+                                  })
                                 ) : (
                                   <option>No voices available</option>
                                 )}
@@ -1212,12 +1226,22 @@ export default function Playground() {
                   onChange={(e) => setSelectedVoice(e.target.value)}
                   disabled={filteredVoices.length === 0}
                 >
+                  <option value="">Select voice</option>
                   {filteredVoices.length > 0 ? (
-                      filteredVoices.map((voice) => (
-                        <option key={`${voice.language}-${voice.voice_name}`} value={voice.voice_name}>
-                          {voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)}
-                        </option>
-                      ))
+                      filteredVoices.map((voice) => {
+                        const isRecommended = recommendedVoices.includes(voice.voice_name)
+                        const displayName = voice.voice_name.charAt(0).toUpperCase() + voice.voice_name.slice(1)
+                        return (
+                          <option 
+                            key={`${voice.language}-${voice.voice_name}`} 
+                            value={voice.voice_name}
+                            data-recommended={isRecommended ? 'true' : 'false'}
+                            className={isRecommended ? 'recommended-option' : ''}
+                          >
+                            {displayName}{isRecommended ? ' (recommended)' : ''}
+                          </option>
+                        )
+                      })
                   ) : (
                     <option>No voices available</option>
                   )}
